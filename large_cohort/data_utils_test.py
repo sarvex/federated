@@ -147,10 +147,10 @@ class CreateSamplingFnTest(tf.test.TestCase):
     # will de-duplicate any repeats, so we assert on the size of the set
     # to ensure there were no duplicates.
     num_samples = 100
-    first_samples = set([
+    first_samples = {
         tuple(create_sample_fn(seed=seed)(round_num=0))
         for seed in range(num_samples)
-    ])
+    }
     self.assertLen(first_samples, num_samples)
 
   def test_no_doubling(self):

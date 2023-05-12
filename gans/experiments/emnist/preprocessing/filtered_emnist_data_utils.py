@@ -78,10 +78,12 @@ def get_filtered_by_user_client_data_for_training(invert_imagery_probability,
     data has
     been filtered by user classification accuracy as per the input arguments.
   """
-  path_to_data = os.path.join(CSVS_BASE_PATH,
-                              'inv_prob_{}'.format(invert_imagery_probability),
-                              'filter_by_user',
-                              'acc_{}'.format(accuracy_threshold))
+  path_to_data = os.path.join(
+      CSVS_BASE_PATH,
+      f'inv_prob_{invert_imagery_probability}',
+      'filter_by_user',
+      f'acc_{accuracy_threshold}',
+  )
 
   try:
     filename = 'client_ids.csv'
@@ -91,13 +93,7 @@ def get_filtered_by_user_client_data_for_training(invert_imagery_probability,
         cache_dir=cache_dir,
         origin=os.path.join(BASE_URL, path_to_data, filename))
   except Exception:
-    msg = ('A URL fetch failure was encountered when trying to retrieve '
-           'filter-by-user generated csv file with invert_imagery_probability '
-           '`{}` and accuracy_threshold `{}`. Please run the ./filter_users.py '
-           'script to generate the missing data, and use the `cache_dir` '
-           'argument to this method to specify the location of the generated '
-           'data csv file.'.format(invert_imagery_probability,
-                                   accuracy_threshold))
+    msg = f'A URL fetch failure was encountered when trying to retrieve filter-by-user generated csv file with invert_imagery_probability `{invert_imagery_probability}` and accuracy_threshold `{accuracy_threshold}`. Please run the ./filter_users.py script to generate the missing data, and use the `cache_dir` argument to this method to specify the location of the generated data csv file.'
     raise ValueError(msg)
 
   return get_filtered_client_data_for_training(path_to_read_inversions_csv,
@@ -143,11 +139,13 @@ def get_filtered_by_example_client_data_for_training(invert_imagery_probability,
     by user classification accuracy, or filtered by example classification
     correctness).
   """
-  path_to_data = os.path.join(CSVS_BASE_PATH,
-                              'inv_prob_{}'.format(invert_imagery_probability),
-                              'filter_by_example',
-                              'min_num_examples_{}'.format(min_num_examples),
-                              '{}'.format(example_class_selection))
+  path_to_data = os.path.join(
+      CSVS_BASE_PATH,
+      f'inv_prob_{invert_imagery_probability}',
+      'filter_by_example',
+      f'min_num_examples_{min_num_examples}',
+      f'{example_class_selection}',
+  )
 
   try:
     filename = 'client_ids.csv'
@@ -164,14 +162,7 @@ def get_filtered_by_example_client_data_for_training(invert_imagery_probability,
         cache_dir=cache_dir,
         origin=os.path.join(BASE_URL, path_to_data, filename))
   except Exception:
-    msg = ('A URL fetch failure was encountered when trying to retrieve '
-           'filter-by-example generated csv files with '
-           'invert_imagery_probability `{}`, min_num_examples `{}`, and '
-           'example_class_selection `{}`. Please run the ./filter_examples.py '
-           'script to generate the missing data, and use the `cache_dir` '
-           'argument to this method to specify the location of the generated '
-           'data csv files.'.format(invert_imagery_probability,
-                                    min_num_examples, example_class_selection))
+    msg = f'A URL fetch failure was encountered when trying to retrieve filter-by-example generated csv files with invert_imagery_probability `{invert_imagery_probability}`, min_num_examples `{min_num_examples}`, and example_class_selection `{example_class_selection}`. Please run the ./filter_examples.py script to generate the missing data, and use the `cache_dir` argument to this method to specify the location of the generated data csv files.'
     raise ValueError(msg)
 
   return get_filtered_client_data_for_training(
@@ -242,8 +233,7 @@ def _filter_by_example(raw_ds, client_ids_example_indices_map, client_id):
 
   # Bind the elements (via a generator fn) into a new tf.data.Dataset.
   def _generator():
-    for element in elements:
-      yield element
+    yield from elements
 
   return tf.data.Dataset.from_generator(_generator, raw_ds.output_types,
                                         raw_ds.output_shapes)
@@ -277,8 +267,7 @@ def _get_client_ids_inversion_and_example_indices_maps(
 
     set_1 = set(client_ids_example_indices_map.keys())
     set_2 = set(selected_client_ids_inversion_map.keys())
-    symmetric_diff = set_1 ^ set_2
-    if symmetric_diff:
+    if symmetric_diff := set_1 ^ set_2:
       raise ValueError(
           'The CSV files at path_to_read_inversions_csv and '
           'path_to_read_example_indices_csv contain different keys.')

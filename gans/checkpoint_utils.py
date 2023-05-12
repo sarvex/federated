@@ -31,9 +31,8 @@ def get_serial_number(export_dir, prefix='ckpt_'):
     The number extracted from the checkpoint directory, or -1 if the directory
     is not formatted correctly.
   """
-  matcher = re.match(r'^{}(?P<num>\d+)$'.format(prefix),
-                     os.path.basename(export_dir))
-  return int(matcher.group('num')) if matcher else -1
+  matcher = re.match(f'^{prefix}(?P<num>\d+)$', os.path.basename(export_dir))
+  return int(matcher['num']) if matcher else -1
 
 
 def latest_checkpoint(root_output_dir, prefix='ckpt_'):
@@ -52,11 +51,11 @@ def latest_checkpoint(root_output_dir, prefix='ckpt_'):
   """
   if not tf.io.gfile.exists(root_output_dir):
     return None
-  checkpoints = tf.io.gfile.glob(
-      os.path.join(root_output_dir, '{}*'.format(prefix)))
-  if not checkpoints:
+  if checkpoints := tf.io.gfile.glob(
+      os.path.join(root_output_dir, f'{prefix}*')):
+    return max(checkpoints, key=lambda ckpt: get_serial_number(ckpt, prefix))
+  else:
     return None
-  return max(checkpoints, key=lambda ckpt: get_serial_number(ckpt, prefix))
 
 
 def save(obj, export_dir, prefix=None):
@@ -77,16 +76,16 @@ def save(obj, export_dir, prefix=None):
     ValueError: If `prefix` is provided and `export_dir` doesn't use the prefix.
   """
   if prefix is not None and get_serial_number(export_dir, prefix) < 0:
-    raise ValueError('Checkpoint dir "{}" is not named like "{}XXXX!'.format(
-        export_dir, prefix))
+    raise ValueError(
+        f'Checkpoint dir "{export_dir}" is not named like "{prefix}XXXX!')
 
   model = tf.Module()
   model.obj = tf.nest.flatten(obj)
   model.build_obj_fn = tf.function(lambda: model.obj, input_signature=())
 
   # First write to a temporary directory.
-  temp_export_dir = os.path.join(
-      os.path.dirname(export_dir), '.temp_' + os.path.basename(export_dir))
+  temp_export_dir = os.path.join(os.path.dirname(export_dir),
+                                 f'.temp_{os.path.basename(export_dir)}')
   try:
     tf.io.gfile.rmtree(temp_export_dir)
   except tf.errors.NotFoundError:
@@ -112,14 +111,13 @@ def load(export_dir, obj_template):
   Raises:
     FileNotFoundError: No such file or directory.
   """
-  if tf.io.gfile.exists(export_dir):
-    loaded = tf.saved_model.load(export_dir)
+  if not tf.io.gfile.exists(export_dir):
+    raise FileNotFoundError(f'No such file or directory: {export_dir}')
 
-    flat_obj = loaded.build_obj_fn()
-    obj = tf.nest.pack_sequence_as(obj_template, flat_obj)
+  loaded = tf.saved_model.load(export_dir)
 
-    logging.info('Checkpoint loaded from: %s', export_dir)
-  else:
-    raise FileNotFoundError('No such file or directory: %s' % export_dir)
+  flat_obj = loaded.build_obj_fn()
+  obj = tf.nest.pack_sequence_as(obj_template, flat_obj)
 
+  logging.info('Checkpoint loaded from: %s', export_dir)
   return obj

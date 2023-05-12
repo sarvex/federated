@@ -97,7 +97,7 @@ def main(argv):
     raise app.UsageError('Too many command-line arguments.')
 
   invert_imagery_likelihood = FLAGS.invert_imagery_likelihood
-  print('invert_imagery_likelihood is %s' % invert_imagery_likelihood)
+  print(f'invert_imagery_likelihood is {invert_imagery_likelihood}')
   if invert_imagery_likelihood > 1.0:
     raise ValueError('invert_imagery_likelihood cannot be greater than 1.0')
 
@@ -114,7 +114,7 @@ def main(argv):
   overall_total_count = 0
   overall_correct_count = 0
   for client_id in client_real_images_tff_data.client_ids:
-    invert_imagery = (1 == np.random.binomial(n=1, p=invert_imagery_likelihood))
+    invert_imagery = np.random.binomial(n=1, p=invert_imagery_likelihood) == 1
 
     # TF Dataset for particular client.
     raw_images_ds = client_real_images_tff_data.create_tf_dataset_for_client(

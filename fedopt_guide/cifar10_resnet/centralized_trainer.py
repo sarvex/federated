@@ -80,8 +80,8 @@ def main(argv):
 
   else:
     raise ValueError(
-        '--task flag {} is not supported, must be one of {}.'.format(
-            FLAGS.task, _SUPPORTED_TASKS))
+        f'--task flag {FLAGS.task} is not supported, must be one of {_SUPPORTED_TASKS}.'
+    )
 
 
 if __name__ == '__main__':

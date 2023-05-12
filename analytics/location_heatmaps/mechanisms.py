@@ -172,8 +172,7 @@ class RapporNoise(NoiseAddition):
     right_enum = lam - np.sqrt(2 * lam * np.log(2 / delta))
     right_denom = n
 
-    eps = np.sqrt(enum / denom) * (1 - right_enum / right_denom)
-    return eps
+    return np.sqrt(enum / denom) * (1 - right_enum / right_denom)
 
   def rappor_central_to_local(self, eps, n, delta):
     sol = optimize.root(

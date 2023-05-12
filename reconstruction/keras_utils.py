@@ -58,7 +58,7 @@ def from_keras_model(
     ValueError: If `keras_model` was compiled.
   """
   if not isinstance(keras_model, tf.keras.Model):
-    raise TypeError('Expected `int`, found {}.'.format(type(keras_model)))
+    raise TypeError(f'Expected `int`, found {type(keras_model)}.')
   if len(input_spec) != 2:
     raise ValueError('The top-level structure in `input_spec` must contain '
                      'exactly two elements, as it must specify type '
@@ -106,9 +106,9 @@ class _KerasReconstructionModel(reconstruction_model.ReconstructionModel):
           (var.ref(), var.name)
           for var in layer.trainable_variables + layer.non_trainable_variables)
 
-    keras_variables = set((var.ref(), var.name)
-                          for var in inner_model.trainable_variables +
-                          inner_model.non_trainable_variables)
+    keras_variables = {(var.ref(), var.name)
+                       for var in inner_model.trainable_variables +
+                       inner_model.non_trainable_variables}
 
     if global_and_local_variables != keras_variables:
       # Use a symmetric set difference to compare the variables, since either
@@ -163,8 +163,9 @@ class _KerasReconstructionModel(reconstruction_model.ReconstructionModel):
     else:
       inputs = batch_input[0]
     if inputs is None:
-      raise KeyError('Received a batch_input that is missing required key `x`. '
-                     'Instead have keys {}'.format(list(batch_input.keys())))
+      raise KeyError(
+          f'Received a batch_input that is missing required key `x`. Instead have keys {list(batch_input.keys())}'
+      )
     predictions = self._keras_model(inputs, training=training)
 
     if isinstance(batch_input, collections.abc.Mapping):

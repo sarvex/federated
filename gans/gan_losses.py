@@ -106,8 +106,8 @@ def get_gan_loss_fns(gan_loss_fns_name):
     gan_loss_fns_fn = GAN_LOSS_FNS_DICT[gan_loss_fns_name]
     return gan_loss_fns_fn()
   raise KeyError(
-      '\'%s\' is invalid flavor of GAN loss function. Choices are %s' %
-      (gan_loss_fns_name, str([name for name in GAN_LOSS_FNS_DICT.keys()])))
+      ('\'%s\' is invalid flavor of GAN loss function. Choices are %s' %
+       (gan_loss_fns_name, str(list(GAN_LOSS_FNS_DICT.keys())))))
 
 
 def _wass_grad_penalty_term(real_images,

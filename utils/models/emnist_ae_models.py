@@ -33,8 +33,8 @@ def create_autoencoder_model(seed: Optional[int] = 0):
   dense_layer = functools.partial(
       tf.keras.layers.Dense, kernel_initializer=initializer)
 
-  model = tf.keras.models.Sequential([
-      dense_layer(1000, activation='sigmoid', input_shape=(784,)),
+  return tf.keras.models.Sequential([
+      dense_layer(1000, activation='sigmoid', input_shape=(784, )),
       dense_layer(500, activation='sigmoid'),
       dense_layer(250, activation='sigmoid'),
       dense_layer(30, activation='linear'),
@@ -43,5 +43,3 @@ def create_autoencoder_model(seed: Optional[int] = 0):
       dense_layer(1000, activation='sigmoid'),
       dense_layer(784, activation='sigmoid'),
   ])
-
-  return model

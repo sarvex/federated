@@ -51,8 +51,9 @@ class CentralizedMainTest(tf.test.TestCase):
     self.assertLen(
         metrics_csv.index,
         num_epochs,
-        msg='The output metrics CSV should have {} rows, equal to the number of'
-        'training epochs.'.format(num_epochs))
+        msg=
+        f'The output metrics CSV should have {num_epochs} rows, equal to the number oftraining epochs.',
+    )
 
     self.assertIn(
         'loss',

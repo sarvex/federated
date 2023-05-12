@@ -170,20 +170,19 @@ def experiment_repeated(bits,
         f'for n={n}, d={d}, mechanism={mechanism}, c={c}, bits={bits}, beta='
         f'{beta:.3f}, eps={epsilons}, k={k_stddevs}, sng={sqrtn_norm_growth}')
 
-  repeat_results = []
-  for client_data in client_data_list:
-    repeat_results.append(
-        experiment(
-            bits=bits,
-            c=c,
-            beta=beta,
-            client_data=client_data,
-            epsilons=epsilons,
-            delta=delta,
-            mechanism=mechanism,
-            k_stddevs=k_stddevs,
-            sqrtn_norm_growth=sqrtn_norm_growth))
-
+  repeat_results = [
+      experiment(
+          bits=bits,
+          c=c,
+          beta=beta,
+          client_data=client_data,
+          epsilons=epsilons,
+          delta=delta,
+          mechanism=mechanism,
+          k_stddevs=k_stddevs,
+          sqrtn_norm_growth=sqrtn_norm_growth,
+      ) for client_data in client_data_list
+  ]
   repeat_gauss_mse_list, repeat_ddgauss_mse_list_per_bit = zip(*repeat_results)
 
   repeat_gauss_mse_list = np.array(repeat_gauss_mse_list)

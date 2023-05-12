@@ -24,7 +24,7 @@ import tensorflow_privacy as tfp
 
 def _check_momentum(m: float):
   if m < 0 or m >= 1:
-    raise ValueError('Momenum should be in [0, 1), but got {}'.format(m))
+    raise ValueError(f'Momenum should be in [0, 1), but got {m}')
 
 
 class ServerOptimizerBase(metaclass=abc.ABCMeta):

@@ -230,9 +230,7 @@ class Shampoo(tf.keras.optimizers.Optimizer):
       return True
     if any(d > self._max_any_dim for d in shape):
       return True
-    if all(d == 1 for d in shape):
-      return True
-    return False
+    return all((d == 1 for d in shape))
 
   def _preconditioner_available_for_dims(
       self, shape: Sequence[tf.TensorShape]) -> List[bool]:
@@ -281,7 +279,7 @@ class Shampoo(tf.keras.optimizers.Optimizer):
                         exponent_t: float,
                         epsilon: float = 1e-12) -> Tuple[float, float]:
     # Apply exponent multiplier.
-    exponent_t = exponent_t * self._exponent_multiplier
+    exponent_t *= self._exponent_multiplier
     output, diff = self._generalized_inverse_pth_root(input_t, exponent_t,
                                                       epsilon)
     return output, diff
@@ -325,20 +323,20 @@ class Shampoo(tf.keras.optimizers.Optimizer):
                                             partition_index: int,
                                             num_partitions: int) -> str:
     if num_partitions == 1:
-      return 'mat_statistics_' + str(dim_index)
+      return f'mat_statistics_{dim_index}'
     else:
-      return str(partition_index) + '_mat_statistics_' + str(dim_index)
+      return f'{partition_index}_mat_statistics_{dim_index}'
 
   def _preconditioner_key_for_partition_and_dim(self, dim_index: int,
                                                 partition_index: int,
                                                 num_partitions: int) -> str:
     if num_partitions == 1:
-      return 'mat_preconditioner_' + str(dim_index)
+      return f'mat_preconditioner_{dim_index}'
     else:
-      return str(partition_index) + '_mat_preconditioner_' + str(dim_index)
+      return f'{partition_index}_mat_preconditioner_{dim_index}'
 
   def _key_for_var(self, var: TfValue, dim_index: int, partition_index: int):
-    return 'P_' + str(partition_index) + '_D_' + str(dim_index) + '_' + var.name
+    return f'P_{partition_index}_D_{dim_index}_{var.name}'
 
   def _updated_statistics(self, var: TfValue,
                           partitioned_grads: Sequence[TfValue]):
@@ -549,10 +547,10 @@ class Shampoo(tf.keras.optimizers.Optimizer):
       v_sqrt = tf.sqrt(v_t)
       per_coord_lr = 1.0 / (v_sqrt + epsilon_t)
     else:
-      raise NotImplementedError('Gradient norm adjuster %s is not supported!' %
-                                self._gradient_norm_adjuster)
+      raise NotImplementedError(
+          f'Gradient norm adjuster {self._gradient_norm_adjuster} is not supported!'
+      )
 
-    update_vs = []
     if self._first_moment_averaging > 0.0:
       # m_t = beta1 * m + (1 - beta1) * g_t
       scaled_g = (1.0 - beta1_t) * (grad * per_coord_lr)
@@ -587,10 +585,7 @@ class Shampoo(tf.keras.optimizers.Optimizer):
       var_update = var.assign_sub(
           lr * gbar_updated, use_locking=self._use_locking)
 
-    update_vs.append(var_update)
-    update_vs.append(m_t)
-    update_vs.append(v_t)
-
+    update_vs = [var_update, m_t, v_t]
     # Create an op that groups all the above operations
     return tf.group(*update_vs)
 

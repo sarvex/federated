@@ -70,7 +70,7 @@ class DummyClientComputation(tff.learning.framework.ClientDeltaFn):
     del client_weight_fn
     self._model = tff.learning.framework.enhance(model)
     if not isinstance(self._model, tff.learning.framework.EnhancedModel):
-      raise TypeError('Expected `int`, found {}.'.format(type(self._model)))
+      raise TypeError(f'Expected `int`, found {type(self._model)}.')
     self._client_weight_fn = None
 
   @property

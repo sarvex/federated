@@ -40,14 +40,14 @@ def get_model_spec():
 
 
 def keras_model_builder_with_ones():
-  model = tf.keras.Sequential([
+  return tf.keras.Sequential([
       tf.keras.layers.Dense(
           1,
           kernel_initializer='ones',
           bias_initializer='ones',
-          input_shape=(1,))
+          input_shape=(1, ),
+      )
   ])
-  return model
 
 
 def create_dataset():

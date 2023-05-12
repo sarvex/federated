@@ -60,9 +60,7 @@ def scaled_dot_product_attention(
 
   attention_weights = tf.nn.softmax(scaled_attention_logits, axis=-1)
 
-  output = tf.matmul(attention_weights, value)
-
-  return output
+  return tf.matmul(attention_weights, value)
 
 
 class MultiHeadAttention(tf.keras.layers.Layer):
@@ -81,8 +79,8 @@ class MultiHeadAttention(tf.keras.layers.Layer):
 
     if d_model % self.num_heads != 0:
       raise ValueError(
-          'Feature dimension should be divisible by number of heads! Got {}/{}'
-          .format(d_model, num_heads))
+          f'Feature dimension should be divisible by number of heads! Got {d_model}/{num_heads}'
+      )
 
     self.depth = d_model // self.num_heads
 
@@ -119,10 +117,7 @@ class MultiHeadAttention(tf.keras.layers.Layer):
     concat_attention = tf.reshape(scaled_attention,
                                   (batch_size, -1, self.d_model))
 
-    # The output is of shape (batch_size, seq_len_q, d_model).
-    output = self.dense(concat_attention)
-
-    return output
+    return self.dense(concat_attention)
 
 
 def point_wise_feed_forward_network(d_model: int,
@@ -165,9 +160,7 @@ class EncoderLayer(tf.keras.layers.Layer):
 
     ffn_output = self.ffn(out1)
     ffn_output = self.dropout2(ffn_output, training=training)
-    out2 = self.layernorm2(out1 + ffn_output)
-
-    return out2
+    return self.layernorm2(out1 + ffn_output)
 
 
 def positional_encoding(max_positions: int, d_model: int) -> tf.Tensor:
@@ -280,8 +273,8 @@ def create_transformer_lm(vocab_size: int = 10000,
   """
   if max_position_encoding > DEFAULT_POSITIONAL_BASE:
     raise ValueError(
-        'The maximum position cannot exceed the default positional base {}'
-        .format(DEFAULT_POSITIONAL_BASE))
+        f'The maximum position cannot exceed the default positional base {DEFAULT_POSITIONAL_BASE}'
+    )
 
   extended_vocab_size = vocab_size + 3 + num_oov_buckets  # For pad/bos/eos/oov.
   inputs = tf.keras.layers.Input(shape=(None,))

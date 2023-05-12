@@ -75,8 +75,8 @@ def plot_f1_line(test_image, true_image, total_size, k=2):
   """Plots f1 line for every k percentiles from 0 to 100."""
 
   test_image = metrics.normalize(metrics.rescale_image(test_image, total_size))
-  x_list = list()
-  y_list = list()
+  x_list = []
+  y_list = []
 
   for i in range(0, 100, k):
     top_k_test = (test_image > np.percentile(test_image, i))

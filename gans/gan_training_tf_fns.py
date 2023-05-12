@@ -135,8 +135,8 @@ def client_computation(
     # the real and fake data). So here we reduce to the min batch size. This
     # also ensures num_examples properly reflects the amount of data trained on.
     min_batch_size = tf.minimum(tf.shape(real_data)[0], tf.shape(gen_inputs)[0])
-    real_data = real_data[0:min_batch_size]
-    gen_inputs = gen_inputs[0:min_batch_size]
+    real_data = real_data[:min_batch_size]
+    gen_inputs = gen_inputs[:min_batch_size]
     num_examples += train_discriminator_fn(generator, discriminator, gen_inputs,
                                            real_data)
 

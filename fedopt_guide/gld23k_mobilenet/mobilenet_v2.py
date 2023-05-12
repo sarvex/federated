@@ -102,29 +102,29 @@ def inverted_res_block(input_tensor,
   image_shape = (input_tensor.shape[row_axis], input_tensor.shape[col_axis])
   num_input_channels = input_tensor.shape[channel_axis]
   x = input_tensor
-  prefix = 'block_{}_'.format(block_number)
+  prefix = f'block_{block_number}_'
 
   if expansion_layer:
     # We perform an initial pointwise convolution layer.
-    x = tf.keras.layers.Conv2D(expansion_factor * num_input_channels,
-                               kernel_size=1,
-                               padding='same',
-                               use_bias=False,
-                               activation=None,
-                               name=prefix + 'expand_conv')(x)
-    x = tfa_layers.GroupNormalization(
-        groups=num_groups, axis=channel_axis, name=prefix + 'expand_gn')(
-            x)
+    x = tf.keras.layers.Conv2D(
+        expansion_factor * num_input_channels,
+        kernel_size=1,
+        padding='same',
+        use_bias=False,
+        activation=None,
+        name=f'{prefix}expand_conv',
+    )(x)
+    x = tfa_layers.GroupNormalization(groups=num_groups,
+                                      axis=channel_axis,
+                                      name=f'{prefix}expand_gn')(x)
     if dropout_prob:
-      x = tf.keras.layers.Dropout(
-          dropout_prob, name=prefix + 'expand_dropout')(
-              x)
-    x = tf.keras.layers.ReLU(6.0, name=prefix + 'expand_relu')(x)
+      x = tf.keras.layers.Dropout(dropout_prob, name=f'{prefix}expand_dropout')(x)
+    x = tf.keras.layers.ReLU(6.0, name=f'{prefix}expand_relu')(x)
 
   # We now use depthwise convolutions
   if stride%2 == 0:
     padding = compute_pad(image_shape, 3, enforce_odd=True)
-    x = tf.keras.layers.ZeroPadding2D(padding=padding, name=prefix + 'pad')(x)
+    x = tf.keras.layers.ZeroPadding2D(padding=padding, name=f'{prefix}pad')(x)
 
   padding_type = 'same' if stride == 1 else 'valid'
   x = tf.keras.layers.DepthwiseConv2D(
@@ -133,31 +133,30 @@ def inverted_res_block(input_tensor,
       activation=None,
       use_bias=False,
       padding=padding_type,
-      name=prefix + 'depthwise_conv')(x)
-  x = tfa_layers.GroupNormalization(
-      groups=num_groups, axis=channel_axis, name=prefix + 'depthwise_gn')(
-          x)
+      name=f'{prefix}depthwise_conv',
+  )(x)
+  x = tfa_layers.GroupNormalization(groups=num_groups,
+                                    axis=channel_axis,
+                                    name=f'{prefix}depthwise_gn')(x)
   if dropout_prob:
-    x = tf.keras.layers.Dropout(
-        dropout_prob, name=prefix + 'depthwise_dropout')(
-            x)
-  x = tf.keras.layers.ReLU(6.0, name=prefix + 'depthwise_relu')(x)
+    x = tf.keras.layers.Dropout(dropout_prob, name=f'{prefix}depthwise_dropout')(x)
+  x = tf.keras.layers.ReLU(6.0, name=f'{prefix}depthwise_relu')(x)
 
   # Projection phase, using pointwise convolutions
   num_projection_filters = _make_divisible(int(filters * alpha), 8)
-  x = tf.keras.layers.Conv2D(num_projection_filters,
-                             kernel_size=1,
-                             padding='same',
-                             use_bias=False,
-                             activation=None,
-                             name=prefix + 'project_conv')(x)
-  x = tfa_layers.GroupNormalization(
-      groups=num_groups, axis=channel_axis, name=prefix + 'project_gn')(
-          x)
+  x = tf.keras.layers.Conv2D(
+      num_projection_filters,
+      kernel_size=1,
+      padding='same',
+      use_bias=False,
+      activation=None,
+      name=f'{prefix}project_conv',
+  )(x)
+  x = tfa_layers.GroupNormalization(groups=num_groups,
+                                    axis=channel_axis,
+                                    name=f'{prefix}project_gn')(x)
   if dropout_prob:
-    x = tf.keras.layers.Dropout(
-        dropout_prob, name=prefix + 'project_dropout')(
-            x)
+    x = tf.keras.layers.Dropout(dropout_prob, name=f'{prefix}project_dropout')(x)
   if num_input_channels == num_projection_filters and stride == 1:
     x = tf.keras.layers.add([input_tensor, x])
   return x
@@ -385,11 +384,7 @@ def create_mobilenet_v2(input_shape,
 
   # For the last layer, we do not use alpha < 1. This is to recreate the
   # non-usage of alpha in the last layer, as stated in the paper.
-  if alpha > 1.0:
-    last_block_filters = _make_divisible(1280 * alpha, 8)
-  else:
-    last_block_filters = 1280
-
+  last_block_filters = _make_divisible(1280 * alpha, 8) if alpha > 1.0 else 1280
   x = tf.keras.layers.Conv2D(
       last_block_filters, kernel_size=1, use_bias=False, name='last_conv')(x)
   x = tfa_layers.GroupNormalization(
@@ -409,9 +404,7 @@ def create_mobilenet_v2(input_shape,
                             use_bias=True,
                             name='logits')(x)
 
-  model = tf.keras.models.Model(inputs=img_input, outputs=x)
-
-  return model
+  return tf.keras.models.Model(inputs=img_input, outputs=x)
 
 
 def create_small_mobilenet_v2(input_shape,
@@ -533,11 +526,7 @@ def create_small_mobilenet_v2(input_shape,
 
   # For the last layer, we do not use alpha < 1. This is to recreate the
   # non-usage of alpha in the last layer, as stated in the paper.
-  if alpha > 1.0:
-    last_block_filters = _make_divisible(640 * alpha, 8)
-  else:
-    last_block_filters = 640
-
+  last_block_filters = _make_divisible(640 * alpha, 8) if alpha > 1.0 else 640
   x = tf.keras.layers.Conv2D(
       last_block_filters, kernel_size=1, use_bias=False, name='last_conv')(x)
   x = tfa_layers.GroupNormalization(

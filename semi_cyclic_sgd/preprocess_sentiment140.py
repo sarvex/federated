@@ -85,7 +85,7 @@ def main(unused_args):
       elif row[0] == '4':
         label = 1
       else:
-        raise ValueError('Invalid label: {}'.format(row[0]))
+        raise ValueError(f'Invalid label: {row[0]}')
       row[0] = label
       text = row[5]
       text = replace_usernames(text)
@@ -94,13 +94,10 @@ def main(unused_args):
       row[5] = text
       lines.append(row)
       for w in split_line(text):
-        if w in unigrams:
-          unigrams[w] = unigrams[w] + 1
-        else:
-          unigrams[w] = 1
+        unigrams[w] = unigrams[w] + 1 if w in unigrams else 1
       i = i + 1
       if i % 100000 == 0:
-        print('read {} rows'.format(i))
+        print(f'read {i} rows')
 
     # lines are sorted by sentiment, then by date. Shuffle.
     print('Shuffling data')
@@ -111,7 +108,7 @@ def main(unused_args):
     print('Writing training data')
     with open(TRAIN_OUTPUT, 'w') as f:
       w = csv.writer(f)
-      for l in lines[0:split_index]:
+      for l in lines[:split_index]:
         w.writerow(l)
     print('Writing test data')
     with open(TEST_OUTPUT, 'w') as f:
@@ -122,8 +119,8 @@ def main(unused_args):
     # Write dictionary.
     unigrams_sorted = sorted(
         list(unigrams.items()), key=lambda kv: kv[1], reverse=True)
-    print(unigrams_sorted[0:20])
-    print('{} lines read'.format(len(lines)))
+    print(unigrams_sorted[:20])
+    print(f'{len(lines)} lines read')
     with open(DICT_OUTPUT, 'w') as f:
       for w in unigrams_sorted:
         f.write(w[0] + '\n')

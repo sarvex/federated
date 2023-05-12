@@ -552,8 +552,7 @@ class UpdateDeltaTest(parameterized.TestCase, tf.test.TestCase):
 
   def struct_to_tensor(self, struct):
     struct_flat = tf.nest.map_structure(lambda x: tf.reshape(x, [-1]), struct)
-    tensor = tf.concat(struct_flat, axis=0)
-    return tensor
+    return tf.concat(struct_flat, axis=0)
 
   @parameterized.named_parameters([
       {

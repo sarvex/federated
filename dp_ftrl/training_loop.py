@@ -294,8 +294,8 @@ class ClientIDShuffler(object):
     """
     if epoch != self._epoch:
       raise ValueError(
-          'Epoch index for client shuffling does not match: {} vs {}'.format(
-              epoch, self._epoch))
+          f'Epoch index for client shuffling does not match: {epoch} vs {self._epoch}'
+      )
     end_index = min(self._start_index + self._clients_per_round,
                     len(self._client_ids))
     sampled_ids = self._client_ids[self._start_index:end_index]

@@ -87,8 +87,7 @@ class FLARSOptimizer(tf.keras.optimizers.Optimizer):
             tf.math.greater(grad_norm, 0),
             (self._eeta * w_norm / (grad_norm + self._epsilon)), 1.0), 1.0)
 
-    scaled_lr = base_lr * tf.minimum(trust_ratio, self._max_ratio)
-    return scaled_lr
+    return base_lr * tf.minimum(trust_ratio, self._max_ratio)
 
   def update_grads_norm(self, vars_list, grads_norm):
     self._grads_norm = dict([

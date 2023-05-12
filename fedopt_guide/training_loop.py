@@ -106,9 +106,8 @@ def _check_iterative_process_compatibility(iterative_process):
 
   if not isinstance(iterative_process, tff.templates.IterativeProcess):
     raise compatibility_error
-  if not hasattr(iterative_process, 'get_model_weights'):
-    raise compatibility_error
-  elif not callable(iterative_process.get_model_weights):
+  if not hasattr(iterative_process, 'get_model_weights') or not callable(
+      iterative_process.get_model_weights):
     raise compatibility_error
   get_model_weights_fn = iterative_process.get_model_weights
 
@@ -219,7 +218,7 @@ def run(iterative_process: tff.templates.IterativeProcess,
     train_metrics['training_secs'] = time.time() - training_start_time
     train_metrics['model_delta_l2_norm'] = _compute_numpy_l2_difference(
         current_model, prev_model)
-    train_metrics.update(round_metrics)
+    train_metrics |= round_metrics
 
     logging.info('Round {:2d}, {:.2f}s per round in average.'.format(
         round_num, (time.time() - loop_start_time) / (round_num + 1)))

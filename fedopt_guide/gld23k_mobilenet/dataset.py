@@ -108,7 +108,7 @@ def get_centralized_datasets(
 ) -> Tuple[tf.data.Dataset, tf.data.Dataset]:
   """Creates a train dataset and a test dataset for centralized experiments."""
   train_data, test_data = tff.simulation.datasets.gldv2.load_data(
-      gld23k=True if dataset_type == DatasetType.GLD23K else False)
+      gld23k=dataset_type == DatasetType.GLD23K)
   centralized_train = train_data.create_tf_dataset_from_all_clients().map(
       functools.partial(_map_fn, is_training=True, image_size=image_size),
       num_parallel_calls=tf.data.experimental.AUTOTUNE).shuffle(

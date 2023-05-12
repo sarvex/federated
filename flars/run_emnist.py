@@ -155,8 +155,6 @@ def _federated_averaging_training_loop(model_fn,
 
   while round_num < total_rounds:
     round_num += 1
-    train_metrics = {}
-
     # Reset the executor to clear the cache, and clear the default graph to
     # garbage collect tf.Functions that will no longer be used.
     tff.backends.native.set_local_execution_context(max_fanout=25)
@@ -165,12 +163,11 @@ def _federated_averaging_training_loop(model_fn,
     round_start_time = time.time()
     data_prep_start_time = time.time()
     train_data = client_datasets_fn(round_num)
-    train_metrics['prepare_datasets_secs'] = time.time() - data_prep_start_time
-
+    train_metrics = {'prepare_datasets_secs': time.time() - data_prep_start_time}
     training_start_time = time.time()
     state, tff_train_metrics = iterative_process.next(state, train_data)
     tff_train_metrics = tff_train_metrics._asdict(recursive=True)
-    train_metrics.update(tff_train_metrics)
+    train_metrics |= tff_train_metrics
     train_metrics['training_secs'] = time.time() - training_start_time
 
     logging.info('Round {:2d} elapsed time: {:.2f}s .'.format(
@@ -184,10 +181,10 @@ def _federated_averaging_training_loop(model_fn,
       train_metrics['save_checkpoint_secs'] = (
           time.time() - save_checkpoint_start_time)
 
-    if round_num % rounds_per_eval == 0 or round_num == total_rounds:
-      if metrics_hook is not None:
-        eval_metrics = evaluate_fn(state)
-        metrics_hook(train_metrics, eval_metrics, round_num)
+    if (round_num % rounds_per_eval == 0
+        or round_num == total_rounds) and metrics_hook is not None:
+      eval_metrics = evaluate_fn(state)
+      metrics_hook(train_metrics, eval_metrics, round_num)
 
 
 def _check_not_exists(f, disable_check_exists=False):
@@ -195,11 +192,9 @@ def _check_not_exists(f, disable_check_exists=False):
   if disable_check_exists:
     return
   if tf.io.gfile.exists(f):
-    print('{} already exists.\n'
-          'Please ensure only a single worker is executing each experiment '
-          'in the grid.\n'
-          'When re-running a grid, please use a fresh output directory.'.format(
-              f))
+    print(
+        f'{f} already exists.\nPlease ensure only a single worker is executing each experiment in the grid.\nWhen re-running a grid, please use a fresh output directory.'
+    )
     sys.exit(1)
 
 
@@ -223,8 +218,7 @@ class _MetricsHook(object):
         exported to TensorBoard.
     """
 
-    summary_logdir = os.path.join(output_dir,
-                                  'logdir/{}'.format(experiment_name))
+    summary_logdir = os.path.join(output_dir, f'logdir/{experiment_name}')
     _check_not_exists(summary_logdir, FLAGS.disable_check_exists)
     tf.io.gfile.makedirs(summary_logdir)
 
@@ -288,9 +282,8 @@ class _MetricsHook(object):
 
 def model_builder():
   """Create compiled keras model."""
-  model = emnist_models.create_original_fedavg_cnn_model(
+  return emnist_models.create_original_fedavg_cnn_model(
       only_digits=FLAGS.digit_only_emnist)
-  return model
 
 
 def loss_builder():
@@ -387,7 +380,7 @@ def _run_experiment():
         momentum=FLAGS.server_momentum,
         max_ratio=FLAGS.max_ratio)
   else:
-    raise ValueError('Optimizer %s is not supported.' % FLAGS.server_optimizer)
+    raise ValueError(f'Optimizer {FLAGS.server_optimizer} is not supported.')
 
   _federated_averaging_training_loop(
       model_fn=tff_model_fn,
@@ -402,8 +395,7 @@ def _run_experiment():
 
 def main(argv):
   if len(argv) > 1:
-    raise app.UsageError('Expected no command-line arguments, '
-                         'got: {}'.format(argv))
+    raise app.UsageError(f'Expected no command-line arguments, got: {argv}')
   try:
     tf.io.gfile.makedirs(os.path.join(FLAGS.root_output_dir, FLAGS.exp_name))
   except tf.errors.OpError:

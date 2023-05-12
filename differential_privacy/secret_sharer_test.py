@@ -146,8 +146,8 @@ class SecretSharerTest(tf.test.TestCase):
         # This client has the same secret in both datasets.
         # Test that the selected examples are different.
         for x, y in zip(dataset_1.enumerate(), dataset_2.enumerate()):
-          if not all(
-              s == t
+          if any(
+              s != t
               for s, t in zip(x[1]['tokens'].numpy(), y[1]['tokens'].numpy())):
             chosen_examples_differ = True
 

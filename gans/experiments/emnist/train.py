@@ -193,8 +193,7 @@ def _save_images(generator, gen_inputs, outdir, file_prefix):
   if not tf.io.gfile.exists(outdir):
     tf.io.gfile.makedirs(outdir)
 
-  f = tf.io.gfile.GFile(
-      os.path.join(outdir, '{}.png'.format(file_prefix)), mode='w')
+  f = tf.io.gfile.GFile(os.path.join(outdir, f'{file_prefix}.png'), mode='w')
   # Convert tiled_image from float32 in [-1, 1] to uint8 [0, 255].
   pil_image = Image.fromarray(
       np.squeeze((255 / 2.0) * (tiled_image + 1.0), axis=2).astype(np.uint8))
@@ -217,23 +216,30 @@ def _compute_eval_metrics(generator, discriminator, gen_inputs, real_images,
   frechet_classifier_distance = eeu.emnist_frechet_distance(
       real_images, gen_images, emnist_classifier)
 
-  metrics = collections.OrderedDict([
+  return collections.OrderedDict([
       ('real_data_logits', real_data_logits),
       ('gen_data_logits', gen_data_logits),
-      ('gen trainable norm',
-       tf.linalg.global_norm(generator.trainable_variables)),
-      ('disc trainable norm',
-       tf.linalg.global_norm(discriminator.trainable_variables)),
-      ('gen non-trainable norm',
-       tf.linalg.global_norm(generator.non_trainable_variables)),
-      ('disc non-trainable norm',
-       tf.linalg.global_norm(discriminator.non_trainable_variables)),
+      (
+          'gen trainable norm',
+          tf.linalg.global_norm(generator.trainable_variables),
+      ),
+      (
+          'disc trainable norm',
+          tf.linalg.global_norm(discriminator.trainable_variables),
+      ),
+      (
+          'gen non-trainable norm',
+          tf.linalg.global_norm(generator.non_trainable_variables),
+      ),
+      (
+          'disc non-trainable norm',
+          tf.linalg.global_norm(discriminator.non_trainable_variables),
+      ),
       ('gen_loss', gen_loss),
       ('disc_loss', disc_loss),
       ('classifier_score', classifier_score),
       ('frechet_classifier_distance', frechet_classifier_distance),
   ])
-  return metrics
 
 
 def _get_emnist_eval_hook_fn(exp_name, output_dir, hparams_dict, gan_loss_fns,
@@ -377,9 +383,7 @@ def _train(gan, server_gen_inputs_dataset, client_gen_inputs_dataset,
 
 
 def _get_path_to_output_image(root_output_dir, exp_name):
-  path_to_output_images = os.path.join(root_output_dir,
-                                       'images/{}'.format(exp_name))
-  return path_to_output_images
+  return os.path.join(root_output_dir, f'images/{exp_name}')
 
 
 def main(argv):
@@ -396,7 +400,7 @@ def main(argv):
     if hparam_dict[k] is None:
       hparam_dict[k] = 'None'
   for k, v in hparam_dict.items():
-    print('{} : {} '.format(k, v))
+    print(f'{k} : {v} ')
 
   tff.backends.native.set_local_execution_context(
       default_num_clients=FLAGS.num_clients_per_round)

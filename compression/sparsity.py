@@ -74,7 +74,7 @@ class OddEvenSparseEncodingStage(te.core.AdaptiveEncodingStageInterface):
   def get_params(self, state):
     encode_params = {self.ODD_EVEN_PARAM_KEY: state[self.ODD_EVEN_STATE_KEY]}
     decode_params = encode_params
-    return encode_params, decode_params
+    return decode_params, decode_params
 
   @property
   def name(self):

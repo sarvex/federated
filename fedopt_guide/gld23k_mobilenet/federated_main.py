@@ -92,7 +92,7 @@ def run_federated(
   num_classes, shuffle_buffer_size = dataset.get_dataset_stats(dataset_type)
 
   train_data, _ = tff.simulation.datasets.gldv2.load_data(
-      gld23k=True if dataset_type == dataset.DatasetType.GLD23K else False)
+      gld23k=dataset_type == dataset.DatasetType.GLD23K)
   _, test_data = dataset.get_centralized_datasets(
       image_size=image_size,
       batch_size=client_batch_size,

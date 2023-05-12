@@ -134,9 +134,8 @@ def build_quantized_dp_query(mechanism, c, padded_d, gamma, stddev, beta,
       beta=beta,
       quantize_scale=quantize_scale)
 
-  compression_dp_query = compression_query.CompressionSumQuery(
+  return compression_query.CompressionSumQuery(
       quantization_params=quantization_params,
       inner_query=discrete_query,
-      record_template=client_template)
-
-  return compression_dp_query
+      record_template=client_template,
+  )

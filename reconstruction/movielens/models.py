@@ -111,9 +111,6 @@ def get_matrix_factorization_model(
   if personal_model and num_users != 1:
     raise ValueError('If personal_model is True, num_users must be 1.')
 
-  # We won't include the input, flatten, or regularization layers in these lists
-  # since they don't contain parameters.
-  global_layers = []
   local_layers = []
 
   # Extract the item embedding.
@@ -126,7 +123,7 @@ def get_matrix_factorization_model(
           l2_normalize=False,
           l2_regularization=l2_regularization),
       name='ItemEmbedding')
-  global_layers.append(item_embedding_layer)
+  global_layers = [item_embedding_layer]
   flat_item_vec = tf.keras.layers.Flatten(name='FlattenItems')(
       item_embedding_layer(item_input))
 

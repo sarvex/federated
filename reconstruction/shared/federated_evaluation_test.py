@@ -64,9 +64,7 @@ class LinearModel(reconstruction_model.ReconstructionModel):
 
   @property
   def local_trainable_variables(self):
-    if self._global_variables_only:
-      return []
-    return [self._variables.bias]
+    return [] if self._global_variables_only else [self._variables.bias]
 
   @property
   def local_non_trainable_variables(self):

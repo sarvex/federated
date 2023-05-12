@@ -182,10 +182,7 @@ def get_gauss_noise_multiplier(target_eps,
 
   min_nm, max_nm = 0.001, 1000
   result, r = optimize.brentq(opt_fn, min_nm, max_nm, full_output=True)
-  if r.converged:
-    return result
-  else:
-    return -1
+  return result if r.converged else -1
 
 
 ############################################################
@@ -272,10 +269,10 @@ def get_ddgauss_epsilon(q,
   sq_l2_scale = l2_sensitivity_squared / (num_clients * variance + DIV_EPSILON)
   l2_scale = math.sqrt(sq_l2_scale)
 
-  tau = 0
-  for k in range(1, num_clients):
-    tau += math.exp(-2 * (variance / (math.pow(gamma, 2) + DIV_EPSILON)) *
-                    math.pi**2 * (k * 1.0 / (k + 1)))
+  tau = sum(
+      math.exp(-2 * (variance / (math.pow(gamma, 2) + DIV_EPSILON)) *
+               math.pi**2 * (k * 1.0 / (k + 1)))
+      for k in range(1, num_clients))
   tau *= 10
 
   rdp = compute_rdp_discrete_gaussian_simplified(q, l2_scale, tau, dimension,
@@ -302,10 +299,7 @@ def get_ddgauss_noise_stddev(q,
     return (epsilon - cur_epsilon)**2
 
   stddev_result = optimize.minimize_scalar(stddev_opt_fn)
-  if stddev_result.success:
-    return stddev_result.x
-  else:
-    return -1
+  return stddev_result.x if stddev_result.success else -1
 
 
 def get_ddgauss_gamma(q,
@@ -346,11 +340,7 @@ def get_ddgauss_gamma(q,
   Returns:
     The selected gamma.
   """
-  if sqrtn_norm_growth:
-    n_factor = num_clients
-  else:
-    n_factor = num_clients**2
-
+  n_factor = num_clients if sqrtn_norm_growth else num_clients**2
   def stddev(x):
     return get_ddgauss_noise_stddev(q, epsilon, l2_clip_norm, x, beta, steps,
                                     num_clients, dimension, delta, orders)
@@ -363,7 +353,4 @@ def get_ddgauss_gamma(q,
     return (math.pow(2, bits) - 2 * mod_min(x) / (x + DIV_EPSILON))**2
 
   gamma_result = optimize.minimize_scalar(gamma_opt_fn)
-  if gamma_result.success:
-    return gamma_result.x
-  else:
-    return -1
+  return gamma_result.x if gamma_result.success else -1

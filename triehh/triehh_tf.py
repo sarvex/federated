@@ -104,26 +104,22 @@ def make_accumulate_client_votes_fn(round_num, num_sub_rounds,
 
     if tf.strings.length(example) < effective_round_num:
       return vote_accumulator
-    else:
-      discovered_prefixes_index = discovered_prefixes_table.lookup(
-          tf.strings.substr(example, 0, effective_round_num))
-      possible_prefix_extensions_index = possible_prefix_extensions_table.lookup(
-          tf.strings.substr(example, effective_round_num, 1))
+    discovered_prefixes_index = discovered_prefixes_table.lookup(
+        tf.strings.substr(example, 0, effective_round_num))
+    possible_prefix_extensions_index = possible_prefix_extensions_table.lookup(
+        tf.strings.substr(example, effective_round_num, 1))
 
-      # If the character extension is not in the alphabet, or the prefix is not
-      # already in the discovered prefixes, do not add client's vote.
-      if tf.math.logical_or(
+    if tf.math.logical_or(
           tf.math.equal(possible_prefix_extensions_index,
                         tf.constant(DEFAULT_VALUE)),
           tf.math.equal(discovered_prefixes_index, tf.constant(DEFAULT_VALUE))):
-        return vote_accumulator
+      return vote_accumulator
 
-      else:
-        indices = [[
-            discovered_prefixes_index, possible_prefix_extensions_index
-        ]]
-        updates = tf.constant([1])
-        return tf.tensor_scatter_nd_add(vote_accumulator, indices, updates)
+    indices = [[
+        discovered_prefixes_index, possible_prefix_extensions_index
+    ]]
+    updates = tf.constant([1])
+    return tf.tensor_scatter_nd_add(vote_accumulator, indices, updates)
 
   return accumulate_client_votes
 
@@ -165,30 +161,28 @@ def client_update(dataset, discovered_prefixes, possible_prefix_extensions,
       shape=[max_num_prefixes,
              tf.shape(possible_prefix_extensions)[0]])
 
-  # If discovered_prefixes is emtpy (training is done), skip the voting.
   if tf.math.equal(tf.size(discovered_prefixes), 0):
     return ClientOutput(client_votes)
-  else:
-    discovered_prefixes_table = tf.lookup.StaticHashTable(
-        tf.lookup.KeyValueTensorInitializer(
-            discovered_prefixes, tf.range(tf.shape(discovered_prefixes)[0])),
-        DEFAULT_VALUE)
+  discovered_prefixes_table = tf.lookup.StaticHashTable(
+      tf.lookup.KeyValueTensorInitializer(
+          discovered_prefixes, tf.range(tf.shape(discovered_prefixes)[0])),
+      DEFAULT_VALUE)
 
-    possible_prefix_extensions_table = tf.lookup.StaticHashTable(
-        tf.lookup.KeyValueTensorInitializer(
-            possible_prefix_extensions,
-            tf.range(tf.shape(possible_prefix_extensions)[0])), DEFAULT_VALUE)
+  possible_prefix_extensions_table = tf.lookup.StaticHashTable(
+      tf.lookup.KeyValueTensorInitializer(
+          possible_prefix_extensions,
+          tf.range(tf.shape(possible_prefix_extensions)[0])), DEFAULT_VALUE)
 
-    accumulate_client_votes_fn = make_accumulate_client_votes_fn(
-        round_num, num_sub_rounds, discovered_prefixes_table,
-        possible_prefix_extensions_table, default_terminator)
+  accumulate_client_votes_fn = make_accumulate_client_votes_fn(
+      round_num, num_sub_rounds, discovered_prefixes_table,
+      possible_prefix_extensions_table, default_terminator)
 
-    sampled_data_list = hh_utils.get_top_elements(dataset,
-                                                  max_user_contribution)
-    sampled_data = tf.data.Dataset.from_tensor_slices(sampled_data_list)
+  sampled_data_list = hh_utils.get_top_elements(dataset,
+                                                max_user_contribution)
+  sampled_data = tf.data.Dataset.from_tensor_slices(sampled_data_list)
 
-    return ClientOutput(
-        sampled_data.reduce(client_votes, accumulate_client_votes_fn))
+  return ClientOutput(
+      sampled_data.reduce(client_votes, accumulate_client_votes_fn))
 
 
 @tf.function()
@@ -283,8 +277,7 @@ def extend_prefixes(prefixes_votes, discovered_prefixes,
     top_indices_mask = tf.sparse.to_dense(top_indices_mask)
     prefixes_mask = tf.math.logical_and(prefixes_mask, top_indices_mask)
 
-  extended_prefixes = tf.boolean_mask(extended_prefix_candiates, prefixes_mask)
-  return extended_prefixes
+  return tf.boolean_mask(extended_prefix_candiates, prefixes_mask)
 
 
 @tf.function()

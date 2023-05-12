@@ -172,18 +172,15 @@ def get_federated_datasets(
                      'tensor of shape [height, width, channels].')
   if not isinstance(serializable, bool):
     raise TypeError(
-        'serializable must be a Boolean; you passed {} of type {}.'.format(
-            serializable, type(serializable)))
+        f'serializable must be a Boolean; you passed {serializable} of type {type(serializable)}.'
+    )
   if train_client_epochs_per_round < 1:
     raise ValueError(
         'train_client_epochs_per_round must be a positive integer.')
   if test_client_epochs_per_round < 0:
     raise ValueError('test_client_epochs_per_round must be a positive integer.')
-  if train_shuffle_buffer_size <= 1:
-    train_shuffle_buffer_size = 1
-  if test_shuffle_buffer_size <= 1:
-    test_shuffle_buffer_size = 1
-
+  train_shuffle_buffer_size = max(train_shuffle_buffer_size, 1)
+  test_shuffle_buffer_size = max(test_shuffle_buffer_size, 1)
   cifar_train, cifar_test = tff.simulation.datasets.cifar100.load_data()
 
   train_preprocess_fn = create_preprocess_fn(
@@ -241,11 +238,8 @@ def get_centralized_datasets(
   if len(crop_shape) != 3:
     raise ValueError('The crop_shape must have length 3, corresponding to a '
                      'tensor of shape [height, width, channels].')
-  if train_shuffle_buffer_size <= 1:
-    train_shuffle_buffer_size = 1
-  if test_shuffle_buffer_size <= 1:
-    test_shuffle_buffer_size = 1
-
+  train_shuffle_buffer_size = max(train_shuffle_buffer_size, 1)
+  test_shuffle_buffer_size = max(test_shuffle_buffer_size, 1)
   cifar_train, cifar_test = tff.simulation.datasets.cifar100.load_data()
   cifar_train = cifar_train.create_tf_dataset_from_all_clients()
   cifar_test = cifar_test.create_tf_dataset_from_all_clients()

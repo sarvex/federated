@@ -91,11 +91,11 @@ def scaled_quantization(x,
   scaled_x = x * scale
   scaled_bound = l2_norm_bound * scale
 
-  quantized_x = tf.cond(
+  return tf.cond(
       tf.cast(stochastic, tf.bool),
       lambda: stochastic_rounding(scaled_x, conditional, scaled_bound, beta),
-      lambda: tf.round(scaled_x))
-  return quantized_x
+      lambda: tf.round(scaled_x),
+  )
 
 
 def inverse_scaled_quantization(x, scale):
@@ -246,8 +246,7 @@ def fast_walsh_hadamard_transform(x):
     # Validate input.
     x = tf.convert_to_tensor(x)
     if x.shape.ndims != 2:
-      raise ValueError('Number of dimensions of x must be 2. Shape of x: %s' %
-                       x.shape)
+      raise ValueError(f'Number of dimensions of x must be 2. Shape of x: {x.shape}')
 
     original_x_shape = x.shape.as_list()
     dim = x.shape.as_list()[-1]

@@ -43,9 +43,8 @@ def _uncompiled_model_fn():
 
 
 def _batch_fn():
-  batch = _Batch(
-      x=np.ones([1, 784], dtype=np.float32), y=np.ones([1, 1], dtype=np.int64))
-  return batch
+  return _Batch(x=np.ones([1, 784], dtype=np.float32),
+                y=np.ones([1, 1], dtype=np.int64))
 
 
 def _create_input_spec():

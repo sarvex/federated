@@ -72,13 +72,11 @@ def build_compressed_dp_query(mechanism, clip, padded_dim, gamma, stddev, beta,
       beta=beta,
       quantize_scale=quantize_scale)
 
-  # Wrap the discrete query with compression operations.
-  compressed_query = compression_query.CompressionSumQuery(
+  return compression_query.CompressionSumQuery(
       quantization_params=quantization_params,
       inner_query=discrete_query,
-      record_template=client_template)
-
-  return compressed_query
+      record_template=client_template,
+  )
 
 
 def build_aggregator(compression_flags, dp_flags, num_clients,

@@ -181,11 +181,8 @@ def get_federated_datasets(
         'train_client_epochs_per_round must be a positive integer.')
   if test_client_epochs_per_round < 0:
     raise ValueError('test_client_epochs_per_round must be a positive integer.')
-  if train_shuffle_buffer_size <= 1:
-    train_shuffle_buffer_size = 1
-  if test_shuffle_buffer_size <= 1:
-    test_shuffle_buffer_size = 1
-
+  train_shuffle_buffer_size = max(train_shuffle_buffer_size, 1)
+  test_shuffle_buffer_size = max(test_shuffle_buffer_size, 1)
   shakespeare_train, shakespeare_test = (
       tff.simulation.datasets.shakespeare.load_data())
 
@@ -231,11 +228,8 @@ def get_centralized_datasets(
     A tuple (shakespeare_train, shakespeare_test) of `tf.data.Dataset` instances
     representing the centralized training and test datasets.
   """
-  if train_shuffle_buffer_size <= 1:
-    train_shuffle_buffer_size = 1
-  if test_shuffle_buffer_size <= 1:
-    test_shuffle_buffer_size = 1
-
+  train_shuffle_buffer_size = max(train_shuffle_buffer_size, 1)
+  test_shuffle_buffer_size = max(test_shuffle_buffer_size, 1)
   shakespeare_train, shakespeare_test = (
       tff.simulation.datasets.shakespeare.load_data())
 

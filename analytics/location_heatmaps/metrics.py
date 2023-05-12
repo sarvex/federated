@@ -149,8 +149,12 @@ def get_metrics(test_image, true_image, top_k, total_size):
 
   mutual = mt.mutual_info_score(true_image.reshape(-1), test_image.reshape(-1))
 
-  metrics = Metrics(l1_distance=l1_distance, l2_distance=l2_distance,
-                    mse=mse, f1=f1, wasserstein=wasserstein,
-                    hotspots_count=top_k_diff, mutual_info=mutual)
-
-  return metrics
+  return Metrics(
+      l1_distance=l1_distance,
+      l2_distance=l2_distance,
+      mse=mse,
+      f1=f1,
+      wasserstein=wasserstein,
+      hotspots_count=top_k_diff,
+      mutual_info=mutual,
+  )

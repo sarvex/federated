@@ -101,16 +101,13 @@ def _analyze_classifier(images_ds, classifier_model):
   correct_indices = []
   incorrect_indices = []
 
-  index = 0
-  for image, label in images_ds:
+  for index, (image, label) in enumerate(images_ds):
     logit = tf.squeeze(classifier_model(tf.expand_dims(image, axis=0)), axis=0)
     predicted_label = tf.math.argmax(logit, output_type=tf.int32)
     if tf.math.equal(label, predicted_label).numpy():
       correct_indices.append(index)
     else:
       incorrect_indices.append(index)
-
-    index += 1
 
   return correct_indices, incorrect_indices
 
@@ -125,7 +122,7 @@ def _get_client_ids_and_examples_based_on_classification(
   client_ids_incorrect_example_indices_map = {}
 
   for client_id in train_tff_data.client_ids:
-    invert_imagery = (1 == np.random.binomial(n=1, p=invert_imagery_likelihood))
+    invert_imagery = np.random.binomial(n=1, p=invert_imagery_likelihood) == 1
 
     # TF Dataset for particular client.
     raw_images_ds = train_tff_data.create_tf_dataset_for_client(client_id)
@@ -168,7 +165,7 @@ def main(argv):
     if hparam_dict[k] is None:
       hparam_dict[k] = 'None'
   for k, v in hparam_dict.items():
-    print('{} : {} '.format(k, v))
+    print(f'{k} : {v} ')
 
   if FLAGS.invert_imagery_likelihood > 1.0:
     raise ValueError('invert_imagery_likelihood cannot be greater than 1.0')

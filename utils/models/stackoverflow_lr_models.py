@@ -32,12 +32,11 @@ def create_logistic_model(vocab_tokens_size: int,
   Returns:
     A `tf.keras.Model`.
   """
-  model = tf.keras.models.Sequential([
+  return tf.keras.models.Sequential([
       tf.keras.layers.Dense(
           vocab_tags_size,
           activation='sigmoid',
-          input_shape=(vocab_tokens_size,),
-          kernel_initializer=tf.keras.initializers.GlorotNormal(seed=seed)),
+          input_shape=(vocab_tokens_size, ),
+          kernel_initializer=tf.keras.initializers.GlorotNormal(seed=seed),
+      ),
   ])
-
-  return model

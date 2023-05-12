@@ -82,8 +82,8 @@ def atomic_write_to_csv(dataframe: pd.DataFrame,
   """
   if not isinstance(dataframe, pd.DataFrame):
     raise ValueError(
-        'dataframe must be an instance of `pandas.DataFrame`, received a `{}`'
-        .format(type(dataframe)))
+        f'dataframe must be an instance of `pandas.DataFrame`, received a `{type(dataframe)}`'
+    )
   # Exporting via to_hdf() is an appealing option, because we could perhaps
   # maintain more type information, and also write both hyperparameters and
   # results to the same HDF5 file. However, to_hdf() call uses pickle under the
@@ -231,11 +231,11 @@ def lookup_flag_values(flag_list: Iterable[str]) -> collections.OrderedDict:
   for flag_name in flag_list:
     if not isinstance(flag_name, str):
       raise ValueError(
-          'All flag names must be strings. Flag {} was of type {}.'.format(
-              flag_name, type(flag_name)))
+          f'All flag names must be strings. Flag {flag_name} was of type {type(flag_name)}.'
+      )
 
     if flag_name not in flags.FLAGS:
-      raise ValueError('"{}" is not a defined flag.'.format(flag_name))
+      raise ValueError(f'"{flag_name}" is not a defined flag.')
     flag_odict[flag_name] = flags.FLAGS[flag_name].value
 
   return flag_odict
@@ -263,10 +263,10 @@ def hparams_to_str(wid: int,
     short_names = {}
 
   name = [
-      '{}={}'.format(short_names.get(k, k), str(v))
+      f'{short_names.get(k, k)}={str(v)}'
       for k, v in sorted(param_dict.items())
   ]
-  hparams_str = '{}-{}'.format(str(wid), ','.join(name))
+  hparams_str = f"{wid}-{','.join(name)}"
 
   # Escape some special characters
   replace_str = {
@@ -315,16 +315,15 @@ def launch_experiment(executable: str,
   command_list = []
   for idx, param_dict in enumerate(grid_iter):
     param_list = [
-        '--{}={}'.format(key, str(value))
-        for key, value in sorted(param_dict.items())
+        f'--{key}={str(value)}' for key, value in sorted(param_dict.items())
     ]
 
     short_names = short_names or {}
     param_str = hparams_to_str(idx, param_dict, short_names)
 
-    param_list.append('--root_output_dir={}'.format(root_output_dir))
-    param_list.append('--exp_name={}'.format(param_str))
-    command = '{} {}'.format(executable, ' '.join(param_list))
+    param_list.append(f'--root_output_dir={root_output_dir}')
+    param_list.append(f'--exp_name={param_str}')
+    command = f"{executable} {' '.join(param_list)}"
     command_list.append(command)
 
   pool = multiprocessing.Pool(processes=max_workers)

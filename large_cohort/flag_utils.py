@@ -66,11 +66,11 @@ def lookup_flag_values(flag_list: Iterable[str]) -> collections.OrderedDict:
   for flag_name in flag_list:
     if not isinstance(flag_name, str):
       raise ValueError(
-          'All flag names must be strings. Flag {} was of type {}.'.format(
-              flag_name, type(flag_name)))
+          f'All flag names must be strings. Flag {flag_name} was of type {type(flag_name)}.'
+      )
 
     if flag_name not in flags.FLAGS:
-      raise ValueError('"{}" is not a defined flag.'.format(flag_name))
+      raise ValueError(f'"{flag_name}" is not a defined flag.')
     flag_odict[flag_name] = flags.FLAGS[flag_name].value
 
   return flag_odict

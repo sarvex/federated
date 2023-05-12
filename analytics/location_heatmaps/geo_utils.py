@@ -66,11 +66,9 @@ def coordinates_to_binary_path(xy_tuple, depth=10):
     binary version of the coordinate.
   """
   x_coord, y_coord = xy_tuple
-  path = ''
-  for j in reversed(range(depth)):
-    path += f'{(x_coord >> j) & 1}{(y_coord >> j) & 1}/'
-  path = path[:-1]
-  return path
+  path = ''.join(f'{x_coord >> j & 1}{y_coord >> j & 1}/'
+                 for j in reversed(range(depth)))
+  return path[:-1]
 
 
 def binary_path_to_coordinates(path):
@@ -217,7 +215,7 @@ def split_regions(tree_prefix_list,
   created = 0
   fresh_expand = 0
   unchanged = 0
-  new_tree_prefix_list = list()
+  new_tree_prefix_list = []
   new_tree = pygtrie.StringTrie()
   for i, count in enumerate(vector_counts):
     prefix = tree_prefix_list[i]
@@ -233,28 +231,25 @@ def split_regions(tree_prefix_list,
           fresh_expand += 1
           new_tree[new_prefix] = len(new_tree_prefix_list)
           new_tree_prefix_list.append(new_prefix)
-    else:
-      if collapse_threshold is not None and\
+    elif collapse_threshold is not None and\
           count <= collapse_threshold and\
           len(prefix) > 2:
 
-        old_prefix = prefix[:-3]
-        collapsed += 1
-        if not new_tree.has_key(old_prefix):
-          created += 1
-          new_tree[old_prefix] = len(new_tree_prefix_list)
-          new_tree_prefix_list.append(old_prefix)
-      else:
-        unchanged += 1
-        new_tree[f'{prefix}'] = len(new_tree_prefix_list)
-        new_tree_prefix_list.append(f'{prefix}')
-  finished = False
+      collapsed += 1
+      old_prefix = prefix[:-3]
+      if not new_tree.has_key(old_prefix):
+        created += 1
+        new_tree[old_prefix] = len(new_tree_prefix_list)
+        new_tree_prefix_list.append(old_prefix)
+    else:
+      unchanged += 1
+      new_tree[f'{prefix}'] = len(new_tree_prefix_list)
+      new_tree_prefix_list.append(f'{prefix}')
   if collapse_threshold:
     print(f'Collapsed: {collapsed}, created when collapsing: {created},' +\
           f'new expanded: {fresh_expand},' +\
           f'unchanged: {unchanged}, total: {len(new_tree_prefix_list)}')
-  if not fresh_expand:  # len(new_tree_prefix_list) <= len(tree_prefix_list):
-    finished = True
+  finished = not fresh_expand
   return new_tree, new_tree_prefix_list, finished
 
 

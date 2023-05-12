@@ -36,33 +36,35 @@ def create_conv_dropout_model(only_digits: bool = True,
   data_format = 'channels_last'
   initializer = tf.keras.initializers.GlorotNormal(seed=seed)
 
-  model = tf.keras.models.Sequential([
+  return tf.keras.models.Sequential([
       tf.keras.layers.Conv2D(
           32,
           kernel_size=(3, 3),
           activation='relu',
           data_format=data_format,
           input_shape=(28, 28, 1),
-          kernel_initializer=initializer),
+          kernel_initializer=initializer,
+      ),
       tf.keras.layers.Conv2D(
           64,
           kernel_size=(3, 3),
           activation='relu',
           data_format=data_format,
-          kernel_initializer=initializer),
+          kernel_initializer=initializer,
+      ),
       tf.keras.layers.MaxPool2D(pool_size=(2, 2), data_format=data_format),
       tf.keras.layers.Dropout(0.25, seed=seed),
       tf.keras.layers.Flatten(),
-      tf.keras.layers.Dense(
-          128, activation='relu', kernel_initializer=initializer),
+      tf.keras.layers.Dense(128,
+                            activation='relu',
+                            kernel_initializer=initializer),
       tf.keras.layers.Dropout(0.5, seed=seed),
       tf.keras.layers.Dense(
           10 if only_digits else 62,
           activation=tf.nn.softmax,
-          kernel_initializer=initializer),
+          kernel_initializer=initializer,
+      ),
   ])
-
-  return model
 
 
 def create_original_fedavg_cnn_model(only_digits: bool = True,
@@ -97,21 +99,21 @@ def create_original_fedavg_cnn_model(only_digits: bool = True,
       activation=tf.nn.relu,
       kernel_initializer=initializer)
 
-  model = tf.keras.models.Sequential([
+  return tf.keras.models.Sequential([
       conv2d(filters=32, input_shape=(28, 28, 1)),
       max_pool(),
       conv2d(filters=64),
       max_pool(),
       tf.keras.layers.Flatten(),
-      tf.keras.layers.Dense(
-          512, activation=tf.nn.relu, kernel_initializer=initializer),
+      tf.keras.layers.Dense(512,
+                            activation=tf.nn.relu,
+                            kernel_initializer=initializer),
       tf.keras.layers.Dense(
           10 if only_digits else 62,
           activation=tf.nn.softmax,
-          kernel_initializer=initializer),
+          kernel_initializer=initializer,
+      ),
   ])
-
-  return model
 
 
 def create_two_hidden_layer_model(only_digits: bool = True,
@@ -134,19 +136,25 @@ def create_two_hidden_layer_model(only_digits: bool = True,
   """
   initializer = tf.keras.initializers.GlorotNormal(seed=seed)
 
-  model = tf.keras.models.Sequential([
-      tf.keras.layers.Reshape(input_shape=(28, 28, 1), target_shape=(28 * 28,)),
+  return tf.keras.models.Sequential([
+      tf.keras.layers.Reshape(input_shape=(28, 28, 1),
+                              target_shape=(28 * 28, )),
       tf.keras.layers.Dense(
-          hidden_units, activation=tf.nn.relu, kernel_initializer=initializer),
+          hidden_units,
+          activation=tf.nn.relu,
+          kernel_initializer=initializer,
+      ),
       tf.keras.layers.Dense(
-          hidden_units, activation=tf.nn.relu, kernel_initializer=initializer),
+          hidden_units,
+          activation=tf.nn.relu,
+          kernel_initializer=initializer,
+      ),
       tf.keras.layers.Dense(
           10 if only_digits else 62,
           activation=tf.nn.softmax,
-          kernel_initializer=initializer),
+          kernel_initializer=initializer,
+      ),
   ])
-
-  return model
 
 
 def create_1m_cnn_model(only_digits: bool = True, seed: Optional[int] = 0):
@@ -176,30 +184,32 @@ def create_1m_cnn_model(only_digits: bool = True, seed: Optional[int] = 0):
   data_format = 'channels_last'
   initializer = tf.keras.initializers.GlorotUniform(seed=seed)
 
-  model = tf.keras.models.Sequential([
+  return tf.keras.models.Sequential([
       tf.keras.layers.Conv2D(
           32,
           kernel_size=(3, 3),
           activation='relu',
           data_format=data_format,
           input_shape=(28, 28, 1),
-          kernel_initializer=initializer),
+          kernel_initializer=initializer,
+      ),
       tf.keras.layers.MaxPool2D(pool_size=(2, 2), data_format=data_format),
       tf.keras.layers.Conv2D(
           64,
           kernel_size=(3, 3),
           activation='relu',
           data_format=data_format,
-          kernel_initializer=initializer),
+          kernel_initializer=initializer,
+      ),
       tf.keras.layers.Dropout(0.25),
       tf.keras.layers.Flatten(),
-      tf.keras.layers.Dense(
-          128, activation='relu', kernel_initializer=initializer),
+      tf.keras.layers.Dense(128,
+                            activation='relu',
+                            kernel_initializer=initializer),
       tf.keras.layers.Dropout(0.5),
       tf.keras.layers.Dense(
           10 if only_digits else 62,
           activation=tf.nn.softmax,
-          kernel_initializer=initializer),
+          kernel_initializer=initializer,
+      ),
   ])
-
-  return model

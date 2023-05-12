@@ -148,9 +148,9 @@ def _validate_flags():
                      'be set to -1 or some positive number, found value of 0.')
   elif FLAGS.max_train_elements > 0 or FLAGS.max_eval_elements > 0:
     if FLAGS.task not in ['stackoverflow_tag', 'stackoverflow_word']:
-      raise ValueError('--max_train_elements and --max_eval_elements flags must'
-                       'be set to -1 for non Stack Overflow task, including the'
-                       ' {} task.'.format(FLAGS.task))
+      raise ValueError(
+          f'--max_train_elements and --max_eval_elements flags mustbe set to -1 for non Stack Overflow task, including the {FLAGS.task} task.'
+      )
 
   if FLAGS.iterative_process == 'FedSGD' and FLAGS.client_optimizer is not None:
     raise ValueError('Found flag --client_optimizer_fn={!s}, but '

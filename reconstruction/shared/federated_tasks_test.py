@@ -177,10 +177,8 @@ class FederatedTasksTest(tf.test.TestCase, parameterized.TestCase):
     clients_per_round = 20
     root_output_dir = self.get_temp_dir()
     exp_name = 'test_run_federated'
-    dp_noise_multiplier = None
     dp_zeroing = True
-    if enable_dp:
-      dp_noise_multiplier = 1.0
+    dp_noise_multiplier = 1.0 if enable_dp else None
     shared_args = collections.OrderedDict(
         client_batch_size=10,
         clients_per_round=1,

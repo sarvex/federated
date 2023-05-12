@@ -26,7 +26,7 @@ def main(argv):
     raise app.UsageError('Too many command-line arguments.')
 
   target = 'gans/experiments/emnist:train'
-  executable = 'bazel run {} --'.format(target)
+  executable = f'bazel run {target} --'
 
   grid_iter = utils_impl.iter_grid({
       'filtering': ['by_user'],

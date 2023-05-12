@@ -186,10 +186,7 @@ def distance_l1(ground_truth, signal, correction=1.0):
     joined[k] += float(v)
   for k, v in signal.items():
     joined[k] -= float(correction) * float(v)
-  total = 0
-  for v in joined.values():
-    total += abs(v)
-  return total
+  return sum(abs(v) for v in joined.values())
 
 
 def precision(ground_truth, signal, k):
@@ -206,10 +203,7 @@ def precision(ground_truth, signal, k):
   top_k_ground_truth = set(top_k(ground_truth, k).keys())
   top_k_signal = set(top_k(signal, k).keys())
   true_positives = len(top_k_signal.intersection(top_k_ground_truth))
-  if top_k_signal:
-    return float(true_positives) / len(top_k_signal)
-  else:
-    return 0.0
+  return float(true_positives) / len(top_k_signal) if top_k_signal else 0.0
 
 
 def recall(ground_truth, signal, k):
@@ -392,15 +386,12 @@ def compute_threshold_leakage(ground_truth, signal, t):
 
 @tff.tf_computation(tff.SequenceType(tf.string))
 def compute_lossless_result_per_user(dataset):
-  # Do not have limit on each client's contribution in this case.
-  k_words = get_top_elements(dataset, tf.constant(tf.int32.max))
-  return k_words
+  return get_top_elements(dataset, tf.constant(tf.int32.max))
 
 
 @tff.federated_computation(tff.type_at_clients(tff.SequenceType(tf.string)))
 def compute_lossless_results_federated(datasets):
-  words = tff.federated_map(compute_lossless_result_per_user, datasets)
-  return words
+  return tff.federated_map(compute_lossless_result_per_user, datasets)
 
 
 def compute_lossless_results(datasets):

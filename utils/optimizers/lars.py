@@ -188,5 +188,5 @@ class LARS(tf.keras.optimizers.Optimizer):
     """Get the variable name from the tensor name."""
     m = re.match('^(.*):\\d+$', param_name)
     if m is not None:
-      param_name = m.group(1)
+      param_name = m[1]
     return param_name

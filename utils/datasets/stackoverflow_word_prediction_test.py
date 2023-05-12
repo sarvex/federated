@@ -195,8 +195,8 @@ STACKOVERFLOW_MODULE = 'tensorflow_federated.simulation.datasets.stackoverflow'
 
 class FederatedDatasetTest(tf.test.TestCase):
 
-  @mock.patch(STACKOVERFLOW_MODULE + '.load_word_counts')
-  @mock.patch(STACKOVERFLOW_MODULE + '.load_data')
+  @mock.patch(f'{STACKOVERFLOW_MODULE}.load_word_counts')
+  @mock.patch(f'{STACKOVERFLOW_MODULE}.load_data')
   def test_preprocess_applied(self, mock_load_data, mock_load_word_counts):
     if tf.config.list_logical_devices('GPU'):
       self.skipTest('skip GPU test')
@@ -236,8 +236,8 @@ class FederatedDatasetTest(tf.test.TestCase):
     # Assert the word counts were loaded once to apply to each dataset.
     mock_load_word_counts.assert_called_once()
 
-  @mock.patch(STACKOVERFLOW_MODULE + '.load_word_counts')
-  @mock.patch(STACKOVERFLOW_MODULE + '.load_data')
+  @mock.patch(f'{STACKOVERFLOW_MODULE}.load_word_counts')
+  @mock.patch(f'{STACKOVERFLOW_MODULE}.load_data')
   def test_raises_no_repeat_and_no_take(self, mock_load_data,
                                         mock_load_word_counts):
     if tf.config.list_logical_devices('GPU'):
@@ -256,8 +256,8 @@ class FederatedDatasetTest(tf.test.TestCase):
 
 class CentralizedDatasetTest(tf.test.TestCase):
 
-  @mock.patch(STACKOVERFLOW_MODULE + '.load_word_counts')
-  @mock.patch(STACKOVERFLOW_MODULE + '.load_data')
+  @mock.patch(f'{STACKOVERFLOW_MODULE}.load_word_counts')
+  @mock.patch(f'{STACKOVERFLOW_MODULE}.load_data')
   def test_preprocess_applied(self, mock_load_data, mock_load_word_counts):
     if tf.config.list_logical_devices('GPU'):
       self.skipTest('skip GPU test')

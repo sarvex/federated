@@ -343,14 +343,13 @@ class YogiOptimizerTest(tf.test.TestCase, parameterized.TestCase):
       beta1_power, beta2_power = get_beta_accumulators(opt, dtype)
       self.assertAllCloseAccordingToType(0.9**t, self.evaluate(beta1_power))
       self.assertAllCloseAccordingToType(0.999**t, self.evaluate(beta2_power))
-      if not tf.executing_eagerly():
-        if t % 2 == 0:
-          self.evaluate(update1)
-        else:
-          self.evaluate(update2)
-      else:
+      if tf.executing_eagerly():
         opt.apply_gradients(zip([grads0, grads1], [var0, var1]))
 
+      elif t % 2 == 0:
+        self.evaluate(update1)
+      else:
+        self.evaluate(update2)
       var0_np, m0, v0 = yogi_update_numpy(var0_np, grads0_np, t, m0, v0)
       var1_np, m1, v1 = yogi_update_numpy(var1_np, grads1_np, t, m1, v1)
 

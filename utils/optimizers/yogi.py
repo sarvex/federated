@@ -158,8 +158,6 @@ class Yogi(tf.keras.optimizers.Optimizer):
       var_update = var.assign(new_var, use_locking=self._use_locking)
 
       update_vs.append(var_update)
-      update_vs.append(v_t)
-
     else:
       # m_t = beta1 * m + (1 - beta1) * g_t
       m = self.get_slot(var, 'm')
@@ -192,9 +190,8 @@ class Yogi(tf.keras.optimizers.Optimizer):
         new_var = new_var / (1 + l2_t * per_coord_lr)
       # Step 3: Update
       var_update = var.assign(new_var, use_locking=self._use_locking)
-      update_vs.append(var_update)
-      update_vs.append(m_t)
-      update_vs.append(v_t)
+      update_vs.extend((var_update, m_t))
+    update_vs.append(v_t)
 
     # Create an op that groups all the above operations
     return tf.group(*update_vs)
@@ -255,8 +252,6 @@ class Yogi(tf.keras.optimizers.Optimizer):
       # Step 3: Update
       var_update = self._resource_scatter_update(var, indices, new_var)
       update_vs.append(var_update)
-      update_vs.append(v_t)
-
     else:
       # m_t = beta1 * m + (1 - beta1) * g_t
       m = self.get_slot(var, 'm')
@@ -294,9 +289,8 @@ class Yogi(tf.keras.optimizers.Optimizer):
         new_var = new_var / (1 + l2_t * per_coord_lr)
       # Step 3: Update
       var_update = self._resource_scatter_update(var, indices, new_var)
-      update_vs.append(var_update)
-      update_vs.append(m_t)
-      update_vs.append(v_t)
+      update_vs.extend((var_update, m_t))
+    update_vs.append(v_t)
 
     # Create an op that groups all the above operations
     return tf.group(*update_vs)

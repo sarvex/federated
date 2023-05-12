@@ -33,15 +33,14 @@ _COMPATIBILITY_ERROR_MESSAGE = (
 
 
 def _keras_model_builder():
-  # Create a simple linear regression model, single output.
-  model = tf.keras.Sequential([
+  return tf.keras.Sequential([
       tf.keras.layers.Dense(
           1,
           kernel_initializer='zeros',
           bias_initializer='zeros',
-          input_shape=(1,))
+          input_shape=(1, ),
+      )
   ])
-  return model
 
 
 def _compiled_keras_model_builder():

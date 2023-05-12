@@ -59,13 +59,11 @@ def get_data(path, crop_tuple=(512, 100, 1536, 1124), total_size=1024):
     image = Image.open(f).convert('L')
   image = image.crop(crop_tuple)
   true_image = np.asarray(image)
-  dataset = list()
+  dataset = []
 
   for i in tqdm.tqdm(range(total_size), total=total_size):
     for j in range(total_size):
-      for _ in range(int(true_image[i, j])):
-        dataset.append([i, j])
-
+      dataset.extend([i, j] for _ in range(int(true_image[i, j])))
   random.shuffle(dataset)
   return true_image, dataset
 
@@ -128,7 +126,6 @@ def run_experiment(true_image,
   """
 
   tree, tree_prefix_list = geo_utils.init_tree()
-  per_level_results = list()
   finished = False
   sum_vector = None
 
@@ -136,8 +133,10 @@ def run_experiment(true_image,
   if level_sample_size % secagg_round_size != 0:
     raise ValueError('Sample size cannot be split into SecAgg')
   else:
-    print_output(f'Total of {level_sample_size/ secagg_round_size} ' +\
-            'SecAgg rounds per level', output_flag)
+    print_output(
+        f'Total of {level_sample_size / secagg_round_size} SecAgg rounds per level',
+        output_flag,
+    )
   # define DP round size
   dp_round_size = min_dp_size if min_dp_size else secagg_round_size
   if threshold and threshold_func:
@@ -145,6 +144,7 @@ def run_experiment(true_image,
   if collapse_threshold and collapse_func:
     raise ValueError('Specify either `collapse_threshold` or `collapse_func`.')
 
+  per_level_results = []
   for i in range(max_levels):
     samples = random.sample(dataset, level_sample_size)
     samples_len = len(samples)
@@ -167,13 +167,13 @@ def run_experiment(true_image,
       noiser = mechanisms.ZeroNoise()
     else:
       # prevent spilling over the budget
-      if remaining_budget:
-        # last round, no progress in tree, or cannot run at least two rounds.
-        if i == max_levels or finished \
-            or remaining_budget < 2 * eps * samples_len:
-          print_output('Last round. Spending remaining epsilon budget: ' +\
-                  f'{remaining_budget}', output_flag)
-          eps = remaining_budget / samples_len
+      if remaining_budget and (i == max_levels or finished
+                               or remaining_budget < 2 * eps * samples_len):
+        print_output(
+            f'Last round. Spending remaining epsilon budget: {remaining_budget}',
+            output_flag,
+        )
+        eps = remaining_budget / samples_len
 
       noiser = noise_class(dp_round_size, 1, eps)
     spent_budget += eps * samples_len

@@ -59,7 +59,7 @@ def _creation_date_string_to_integer(dates: tf.Tensor) -> tf.Tensor:
   timestamp = (timestamp + day) * 100
   timestamp = (timestamp + hour) * 100
   timestamp = (timestamp + minute) * 100
-  timestamp = timestamp + second
+  timestamp += second
   return timestamp
 
 

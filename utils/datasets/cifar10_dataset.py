@@ -78,7 +78,7 @@ def load_cifar10_federated(
   test_multinomial_vals = []
   # Each client has a multinomial distribution over classes drawn from a
   # Dirichlet.
-  for i in range(num_clients):
+  for _ in range(num_clients):
     proportion = np.random.dirichlet(dirichlet_parameter *
                                      np.ones(NUM_CLASSES,))
     train_multinomial_vals.append(proportion)
@@ -109,7 +109,7 @@ def load_cifar10_federated(
   test_examples_per_client = int(TEST_EXAMPLES / num_clients)
   for k in range(num_clients):
 
-    for i in range(train_examples_per_client):
+    for _ in range(train_examples_per_client):
       sampled_label = np.argwhere(
           np.random.multinomial(1, train_multinomial_vals[k, :]) == 1)[0][0]
       train_client_samples[k].append(
@@ -121,7 +121,7 @@ def load_cifar10_federated(
             train_multinomial_vals /
             train_multinomial_vals.sum(axis=1)[:, None])
 
-    for i in range(test_examples_per_client):
+    for _ in range(test_examples_per_client):
       sampled_label = np.argwhere(
           np.random.multinomial(1, test_multinomial_vals[k, :]) == 1)[0][0]
       test_client_samples[k].append(test_indices[sampled_label,
@@ -297,18 +297,15 @@ def get_federated_datasets(train_client_batch_size: int = 20,
                      'tensor of shape [height, width, channels].')
   if not isinstance(serializable, bool):
     raise TypeError(
-        'serializable must be a Boolean; you passed {} of type {}.'.format(
-            serializable, type(serializable)))
+        f'serializable must be a Boolean; you passed {serializable} of type {type(serializable)}.'
+    )
   if train_client_epochs_per_round < 1:
     raise ValueError(
         'train_client_epochs_per_round must be a positive integer.')
   if test_client_epochs_per_round < 0:
     raise ValueError('test_client_epochs_per_round must be a positive integer.')
-  if train_shuffle_buffer_size <= 1:
-    train_shuffle_buffer_size = 1
-  if test_shuffle_buffer_size <= 1:
-    test_shuffle_buffer_size = 1
-
+  train_shuffle_buffer_size = max(train_shuffle_buffer_size, 1)
+  test_shuffle_buffer_size = max(test_shuffle_buffer_size, 1)
   cifar_train, cifar_test = load_cifar10_federated()
 
   train_preprocess_fn = create_preprocess_fn(
@@ -366,11 +363,8 @@ def get_centralized_datasets(
   if len(crop_shape) != 3:
     raise ValueError('The crop_shape must have length 3, corresponding to a '
                      'tensor of shape [height, width, channels].')
-  if train_shuffle_buffer_size <= 1:
-    train_shuffle_buffer_size = 1
-  if test_shuffle_buffer_size <= 1:
-    test_shuffle_buffer_size = 1
-
+  train_shuffle_buffer_size = max(train_shuffle_buffer_size, 1)
+  test_shuffle_buffer_size = max(test_shuffle_buffer_size, 1)
   cifar_train, cifar_test = load_cifar10_federated()
   cifar_train = cifar_train.create_tf_dataset_from_all_clients()
   cifar_test = cifar_test.create_tf_dataset_from_all_clients()

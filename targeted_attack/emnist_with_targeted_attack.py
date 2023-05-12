@@ -123,7 +123,7 @@ def make_federated_data_with_malicious(client_data,
       preprocess(client_data.create_tf_dataset_for_client(x))
       for x in client_ids
   ]
-  malicious_dataset = [dataset_malicious for x in client_ids]
+  malicious_dataset = [dataset_malicious for _ in client_ids]
   if with_attack:
     client_type_list = [tf.cast(0, tf.bool)] * (len(client_ids) - 1) + [
         tf.cast(1, tf.bool)
@@ -148,23 +148,27 @@ def sample_clients_with_malicious(client_data,
 def create_keras_model():
   """Build compiled keras model."""
   num_classes = 10 if FLAGS.only_digits else 62
-  model = tf.keras.models.Sequential([
+  return tf.keras.models.Sequential([
       tf.keras.layers.Conv2D(
           32,
           kernel_size=(3, 3),
           activation='relu',
           input_shape=data_shape,
-          data_format=data_format),
+          data_format=data_format,
+      ),
       tf.keras.layers.Conv2D(
-          64, kernel_size=(3, 3), activation='relu', data_format=data_format),
+          64,
+          kernel_size=(3, 3),
+          activation='relu',
+          data_format=data_format,
+      ),
       tf.keras.layers.MaxPool2D(pool_size=(2, 2), data_format=data_format),
       tf.keras.layers.Dropout(0.25),
       tf.keras.layers.Flatten(),
       tf.keras.layers.Dense(128, activation='relu'),
       tf.keras.layers.Dropout(0.5),
-      tf.keras.layers.Dense(num_classes, activation='softmax')
+      tf.keras.layers.Dense(num_classes, activation='softmax'),
   ])
-  return model
 
 
 def evaluate(state, x, y, target_x, target_y, batch_size=100):
@@ -193,8 +197,7 @@ def create_if_not_exists(path):
   try:
     tf.io.gfile.makedirs(path)
   except tf.errors.OpError:
-    print('Skipping creation of directory {}, directory already exists'.format(
-        path))
+    print(f'Skipping creation of directory {path}, directory already exists')
 
 
 def main(argv):
@@ -209,7 +212,7 @@ def main(argv):
   flag_dict = FLAGS.flag_values_dict()
   configs = '-'.join(
       ['{}={}'.format(k, flag_dict[k]) for k in keys if k != 'root_output_dir'])
-  file_name = 'log' + configs
+  file_name = f'log{configs}'
   create_if_not_exists(FLAGS.root_output_dir)
   file_handle = open(os.path.join(FLAGS.root_output_dir, file_name), 'w')
 
@@ -247,7 +250,7 @@ def main(argv):
         metrics=[tf.keras.metrics.SparseCategoricalAccuracy()])
 
   # define server optimizer
-  nesterov = True if FLAGS.server_momentum != 0 else False
+  nesterov = FLAGS.server_momentum != 0
 
   def server_optimizer_fn():
     return tf.keras.optimizers.SGD(

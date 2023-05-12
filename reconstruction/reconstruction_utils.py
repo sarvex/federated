@@ -188,9 +188,7 @@ def has_only_global_variables(
   local_variables_list = (
       list(model.local_trainable_variables) +
       list(model.local_non_trainable_variables))
-  if local_variables_list:
-    return False
-  return True
+  return not local_variables_list
 
 
 @attr.s(eq=False, frozen=True)

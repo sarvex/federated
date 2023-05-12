@@ -51,10 +51,7 @@ def _for_iter_dataset_fn(reduce_fn, dataset, initial_state_fn):
 
 def _build_dataset_reduce_fn(simulation_flag=True):
   """Returns a reduce loop function on input dataset."""
-  if simulation_flag:
-    return _for_iter_dataset_fn
-  else:
-    return _dataset_reduce_fn
+  return _for_iter_dataset_fn if simulation_flag else _dataset_reduce_fn
 
 
 def _unpack_data_label(batch):

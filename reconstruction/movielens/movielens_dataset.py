@@ -189,8 +189,8 @@ def split_ratings_df(
   """
   if train_fraction + val_fraction > 1:
     raise ValueError(
-        "train_fraction and val_fraction can't sum to greater than 1, got {}"
-        "and {}.".format(train_fraction, val_fraction))
+        f"train_fraction and val_fraction can't sum to greater than 1, got {train_fraction}and {val_fraction}."
+    )
 
   # For each rating, calculate its rank among other ratings for that user,
   # ordered by increasing timestamp. Then normalize by counts per user to get
@@ -354,12 +354,16 @@ def create_tf_datasets(ratings_df: pd.DataFrame,
         if personal_model is True.
   """
   num_users = len(set(ratings_df.UserID))
-  tf_datasets = [
-      create_tf_dataset_for_user(ratings_df, i, personal_model, batch_size,
-                                 max_examples_per_user, num_local_epochs)
-      for i in range(num_users)
+  return [
+      create_tf_dataset_for_user(
+          ratings_df,
+          i,
+          personal_model,
+          batch_size,
+          max_examples_per_user,
+          num_local_epochs,
+      ) for i in range(num_users)
   ]
-  return tf_datasets
 
 
 def split_tf_datasets(
@@ -387,8 +391,8 @@ def split_tf_datasets(
   """
   if train_fraction + val_fraction > 1:
     raise ValueError(
-        "train_fraction and val_fraction can't sum to greater than 1, got {}"
-        "and {}.".format(train_fraction, val_fraction))
+        f"train_fraction and val_fraction can't sum to greater than 1, got {train_fraction}and {val_fraction}."
+    )
 
   np.random.seed(NP_RANDOM_SEED)
   np.random.shuffle(tf_datasets)

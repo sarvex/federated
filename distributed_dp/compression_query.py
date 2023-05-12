@@ -32,10 +32,10 @@ from distributed_dp import compression_utils
 
 
 def _attr_bool_check(instance, attribute, value):
-  if not isinstance(value, tf.Tensor):
-    if not isinstance(value, (bool, np.bool, np.bool_)):
-      raise ValueError(f'`{attribute.name}` should be a bool constant. Found '
-                       f'`{value}` with type `{type(value)}`.')
+  if not isinstance(value, tf.Tensor) and not isinstance(
+      value, (bool, np.bool, np.bool_)):
+    raise ValueError(f'`{attribute.name}` should be a bool constant. Found '
+                     f'`{value}` with type `{type(value)}`.')
 
 
 @attr.s(eq=False)
@@ -63,15 +63,13 @@ class QuantizationParams(metaclass=abc.ABCMeta):
 
   @l2_norm_bound.validator
   def check_l2_norm_bound(self, attribute, value):
-    if not isinstance(value, tf.Tensor):
-      if value <= 0:
-        raise ValueError(f'`l2_norm_bound` must be > 0. Found {value}.')
+    if not isinstance(value, tf.Tensor) and value <= 0:
+      raise ValueError(f'`l2_norm_bound` must be > 0. Found {value}.')
 
   @beta.validator
   def check_beta(self, attribute, value):
-    if not isinstance(value, tf.Tensor):
-      if value < 0 or value >= 1:
-        raise ValueError(f'`beta` must be in [0, 1). Found {value}.')
+    if not isinstance(value, tf.Tensor) and (value < 0 or value >= 1):
+      raise ValueError(f'`beta` must be in [0, 1). Found {value}.')
 
   @abc.abstractmethod
   def to_tf_tensors(self):
@@ -93,9 +91,8 @@ class ScaledQuantizationParams(QuantizationParams):
 
   @quantize_scale.validator
   def check_quantize_scale(self, attribute, value):
-    if not isinstance(value, tf.Tensor):
-      if value <= 0:
-        raise ValueError(f'`quantize_scale` must be positive. Found {value}.')
+    if not isinstance(value, tf.Tensor) and value <= 0:
+      raise ValueError(f'`quantize_scale` must be positive. Found {value}.')
 
   def to_tf_tensors(self):
     # Make a copy to ensure TF tensors get created only when needed.
@@ -160,13 +157,12 @@ class CompressionSumQuery(tfp.SumAggregationDPQuery):
     self._inner_query = inner_query
     self._record_template = record_template
 
-    if isinstance(quantization_params, ScaledQuantizationParams):
-      self._quantization_fn = scaled_quantization
-      self._inverse_quantization_fn = inverse_scaled_quantization
-    else:
+    if not isinstance(quantization_params, ScaledQuantizationParams):
       raise ValueError(
           f'Unknown type(quantization_params) of {type(quantization_params)} '
           f'with value {quantization_params}.')
+    self._quantization_fn = scaled_quantization
+    self._inverse_quantization_fn = inverse_scaled_quantization
 
   def set_ledger(self, ledger):
     raise NotImplementedError(
@@ -199,8 +195,7 @@ class CompressionSumQuery(tfp.SumAggregationDPQuery):
     casted_record = tf.cast(record_as_vector, tf.float32)
     rotated_record = compression_utils.randomized_hadamard_transform(
         casted_record, sample_hadamard_seed)
-    encoded_record = self._quantization_fn(rotated_record, quantization_params)
-    return encoded_record
+    return self._quantization_fn(rotated_record, quantization_params)
 
   def _decode_agg_record(self, agg_record, record_template,
                          sample_hadamard_seed: tf.Tensor,

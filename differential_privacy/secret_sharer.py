@@ -39,8 +39,8 @@ def build_secret_inserting_transform_fn(
     to insert secrets.
   """
 
-  if (not secrets or not isinstance(secrets, dict) or
-      not all([isinstance(secret, str) for secret in secrets])):
+  if (not secrets or not isinstance(secrets, dict)
+      or not all(isinstance(secret, str) for secret in secrets)):
     raise ValueError('`secrets` must be a non-zero length dict with str keys.')
 
   if any(value[0] <= 0 for value in secrets.values()):

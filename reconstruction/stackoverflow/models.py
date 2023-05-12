@@ -56,9 +56,7 @@ class GlobalEmbedding(tf.keras.layers.Layer):
         tf.zeros_like(input=embeddings))
 
   def compute_mask(self, inputs, mask=None):
-    if not self.mask_zero:
-      return None
-    return tf.not_equal(inputs, 0)
+    return None if not self.mask_zero else tf.not_equal(inputs, 0)
 
 
 class LocalEmbedding(tf.keras.layers.Layer):
@@ -102,9 +100,7 @@ class LocalEmbedding(tf.keras.layers.Layer):
         tf.zeros_like(input=embeddings))
 
   def compute_mask(self, inputs, mask=None):
-    if not self.mask_zero:
-      return None
-    return tf.not_equal(inputs, 0)
+    return None if not self.mask_zero else tf.not_equal(inputs, 0)
 
 
 def create_recurrent_reconstruction_model(
@@ -148,15 +144,14 @@ def create_recurrent_reconstruction_model(
   """
 
   if vocab_size < 0:
-    raise ValueError('The vocab_size is expected to be greater than, or equal '
-                     'to 0. Got {}'.format(vocab_size))
+    raise ValueError(
+        f'The vocab_size is expected to be greater than, or equal to 0. Got {vocab_size}'
+    )
 
   if num_oov_buckets <= 0:
-    raise ValueError('The number of out of vocabulary buckets is expected to '
-                     'be greater than 0. Got {}'.format(num_oov_buckets))
-
-  global_layers = []
-  local_layers = []
+    raise ValueError(
+        f'The number of out of vocabulary buckets is expected to be greater than 0. Got {num_oov_buckets}'
+    )
 
   total_vocab_size = vocab_size + 3  # pad/bos/eos.
   extended_vocab_size = total_vocab_size + num_oov_buckets  # pad/bos/eos + oov.
@@ -167,29 +162,27 @@ def create_recurrent_reconstruction_model(
       embedding_dim=embedding_size,
       mask_zero=True,
       name='global_embedding_layer')
-  global_layers.append(global_embedding)
-
+  global_layers = [global_embedding]
   local_embedding = LocalEmbedding(
       input_dim=num_oov_buckets,
       embedding_dim=embedding_size,
       total_vocab_size=total_vocab_size,
       mask_zero=True,
       name='local_embedding_layer')
-  local_layers.append(local_embedding)
-
+  local_layers = [local_embedding]
   projected = tf.keras.layers.Add()(
       [global_embedding(inputs),
        local_embedding(inputs)])
 
   for i in range(num_layers):
-    layer = tf.keras.layers.LSTM(
-        latent_size, return_sequences=True, name='lstm_' + str(i))
+    layer = tf.keras.layers.LSTM(latent_size,
+                                 return_sequences=True,
+                                 name=f'lstm_{str(i)}')
     global_layers.append(layer)
     processed = layer(projected)
     # A projection changes dimension from rnn_layer_size to
     # input_embedding_size.
-    projection = tf.keras.layers.Dense(
-        embedding_size, name='projection_' + str(i))
+    projection = tf.keras.layers.Dense(embedding_size, name=f'projection_{str(i)}')
     global_layers.append(projection)
     projected = projection(processed)
 

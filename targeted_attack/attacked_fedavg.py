@@ -528,9 +528,8 @@ class ClientProjectBoost:
 
       if delta_norm < norm:
         return gradient
-      else:
-        delta_mul_factor = tf.math.divide_no_nan(norm, delta_norm)
-        return tf.nest.map_structure(lambda g: g * delta_mul_factor, gradient)
+      delta_mul_factor = tf.math.divide_no_nan(norm, delta_norm)
+      return tf.nest.map_structure(lambda g: g * delta_mul_factor, gradient)
 
     @tf.function
     def project_weights(weights, initial_weights, norm):

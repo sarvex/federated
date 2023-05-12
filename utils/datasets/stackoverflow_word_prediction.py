@@ -243,13 +243,10 @@ def get_federated_datasets(
     training and test datasets.
   """
   if vocab_size <= 0:
-    raise ValueError('vocab_size must be a positive integer; you have '
-                     'passed {}'.format(vocab_size))
-  if train_shuffle_buffer_size <= 1:
-    train_shuffle_buffer_size = 1
-  if test_shuffle_buffer_size <= 1:
-    test_shuffle_buffer_size = 1
-
+    raise ValueError(
+        f'vocab_size must be a positive integer; you have passed {vocab_size}')
+  train_shuffle_buffer_size = max(train_shuffle_buffer_size, 1)
+  test_shuffle_buffer_size = max(test_shuffle_buffer_size, 1)
   (stackoverflow_train, _,
    stackoverflow_test) = tff.simulation.datasets.stackoverflow.load_data()
 

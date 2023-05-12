@@ -83,9 +83,9 @@ STACKOVERFLOW_MODULE = 'tensorflow_federated.simulation.datasets.stackoverflow'
 
 class FederatedDatasetTest(tf.test.TestCase):
 
-  @mock.patch(STACKOVERFLOW_MODULE + '.load_tag_counts')
-  @mock.patch(STACKOVERFLOW_MODULE + '.load_word_counts')
-  @mock.patch(STACKOVERFLOW_MODULE + '.load_data')
+  @mock.patch(f'{STACKOVERFLOW_MODULE}.load_tag_counts')
+  @mock.patch(f'{STACKOVERFLOW_MODULE}.load_word_counts')
+  @mock.patch(f'{STACKOVERFLOW_MODULE}.load_data')
   def test_preprocess_applied(self, mock_load_data, mock_load_word_counts,
                               mock_load_tag_counts):
     if tf.config.list_logical_devices('GPU'):
@@ -132,9 +132,9 @@ class FederatedDatasetTest(tf.test.TestCase):
 
 class CentralizedDatasetTest(tf.test.TestCase):
 
-  @mock.patch(STACKOVERFLOW_MODULE + '.load_tag_counts')
-  @mock.patch(STACKOVERFLOW_MODULE + '.load_word_counts')
-  @mock.patch(STACKOVERFLOW_MODULE + '.load_data')
+  @mock.patch(f'{STACKOVERFLOW_MODULE}.load_tag_counts')
+  @mock.patch(f'{STACKOVERFLOW_MODULE}.load_word_counts')
+  @mock.patch(f'{STACKOVERFLOW_MODULE}.load_data')
   def test_preprocess_applied(self, mock_load_data, mock_load_word_counts,
                               mock_load_tag_counts):
     if tf.config.list_logical_devices('GPU'):

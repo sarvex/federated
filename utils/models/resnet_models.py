@@ -317,8 +317,7 @@ def create_resnet(input_shape,
       bias_regularizer=tf.keras.regularizers.l2(L2_WEIGHT_DECAY))(
           x)
 
-  model = tf.keras.models.Model(img_input, x)
-  return model
+  return tf.keras.models.Model(img_input, x)
 
 
 def create_resnet18(input_shape, num_classes, norm='group', seed=0):

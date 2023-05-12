@@ -54,7 +54,7 @@ def create_real_images_tff_client_data(split='train', num_pseudo_clients=1):
     return (_get_transformed_client_data(train_tff_data, num_pseudo_clients),
             _get_transformed_client_data(eval_tff_data, num_pseudo_clients))
   else:
-    raise ValueError('Unknown dataset split ' + split)
+    raise ValueError(f'Unknown dataset split {split}')
 
 
 def preprocess_img_dataset(images_ds,

@@ -195,13 +195,13 @@ def _server_optimizer_fn(model_weights, name, learning_rate, noise_std):
         noise_std=noise_std,
         model_weight_specs=model_weight_specs)
   else:
-    raise ValueError('Unknown server optimizer name {}'.format(name))
+    raise ValueError(f'Unknown server optimizer name {name}')
 
 
 def _build_server_state_epoch_update_fn(server_optimizer_name, model_fn,
                                         server_optimizer_fn):
   """Build server update function: tree restart for FTRL."""
-  if server_optimizer_name == 'dpftrl' or server_optimizer_name == 'dpftrlm':
+  if server_optimizer_name in ['dpftrl', 'dpftrlm']:
     # A server optimzier is built to get a new state to restart the optimizer.
     # A model is built to initialize the optimizer because the optimizer state
     # depends on the shape of the model weights. The model and optimizer are
@@ -225,7 +225,7 @@ def _client_optimizer_fn(name, learning_rate):
   if name == 'sgd':
     return tf.keras.optimizers.SGD(learning_rate)
   else:
-    raise ValueError('Unknown client optimizer name {}'.format(name))
+    raise ValueError(f'Unknown client optimizer name {name}')
 
 
 def _sample_client_ids(
@@ -396,8 +396,7 @@ def train_and_eval():
 
 def main(argv):
   if len(argv) > 1:
-    raise app.UsageError('Expected no command-line arguments, '
-                         'got: {}'.format(argv))
+    raise app.UsageError(f'Expected no command-line arguments, got: {argv}')
 
   # Multi-GPU configuration
   client_devices = tf.config.list_logical_devices('GPU')

@@ -155,7 +155,7 @@ def write_checkpoint(root_checkpoint_dir, server_state, round_num):
     # original (which captures random model initialization).
     checkpoints = sorted(
         tf.io.gfile.glob(
-            os.path.join(root_checkpoint_dir, CHECKPOINT_PREFIX + '*')))
+            os.path.join(root_checkpoint_dir, f'{CHECKPOINT_PREFIX}*')))
     to_remove = checkpoints[1:-1]
     logging.info('Cleaning up %s', to_remove)
     for checkpoint in to_remove:

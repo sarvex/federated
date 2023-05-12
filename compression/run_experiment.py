@@ -139,17 +139,16 @@ def _mean_encoder_fn(spec):
   Returns:
     A `te.core.GatherEncoder`.
   """
-  if spec.shape.num_elements() > 10000:
-    if FLAGS.use_sparsity_in_aggregation:
-      return te.encoders.as_gather_encoder(
-          sparsity.sparse_quantizing_encoder(
-              FLAGS.aggregation_quantization_bits), spec)
-    else:
-      return te.encoders.as_gather_encoder(
-          te.encoders.uniform_quantization(FLAGS.aggregation_quantization_bits),
-          spec)
-  else:
+  if spec.shape.num_elements() <= 10000:
     return te.encoders.as_gather_encoder(te.encoders.identity(), spec)
+  if FLAGS.use_sparsity_in_aggregation:
+    return te.encoders.as_gather_encoder(
+        sparsity.sparse_quantizing_encoder(
+            FLAGS.aggregation_quantization_bits), spec)
+  else:
+    return te.encoders.as_gather_encoder(
+        te.encoders.uniform_quantization(FLAGS.aggregation_quantization_bits),
+        spec)
 
 
 def _configure_managers():
@@ -263,8 +262,7 @@ def run_experiment():
 
 def main(argv):
   if len(argv) > 1:
-    raise app.UsageError('Expected no command-line arguments, '
-                         'got: {}'.format(argv))
+    raise app.UsageError(f'Expected no command-line arguments, got: {argv}')
   tff.backends.native.set_local_execution_context(max_fanout=25)
   run_experiment()
 

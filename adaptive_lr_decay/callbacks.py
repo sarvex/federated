@@ -105,12 +105,11 @@ class ReduceLROnPlateau(object):
       wait = 0
     elif cooldown_counter <= 0:
       wait += 1
-      if wait >= self.patience:
-        if learning_rate > self.min_lr:
-          learning_rate = tf.maximum(learning_rate * self.decay_factor,
-                                     self.min_lr)
-          cooldown_counter = self.cooldown
-          wait = 0
+      if wait >= self.patience and learning_rate > self.min_lr:
+        learning_rate = tf.maximum(learning_rate * self.decay_factor,
+                                   self.min_lr)
+        cooldown_counter = self.cooldown
+        wait = 0
 
     # Return an updated callback
     return tff.structure.update_struct(
@@ -134,9 +133,7 @@ class ReduceLROnPlateau(object):
 def create_reduce_lr_on_plateau(**kwargs):
   """Initializes a callback in a way that automatically infers attributes."""
   callback = ReduceLROnPlateau(**kwargs)
-  if callback.learning_rate < callback.min_lr:
-    callback.learning_rate = callback.min_lr
-
+  callback.learning_rate = max(callback.learning_rate, callback.min_lr)
   if callback.decay_factor > 1.0 or callback.decay_factor < 0:
     raise ValueError('Decay factor must be in the range [0, 1].')
 
@@ -157,8 +154,8 @@ def create_reduce_lr_on_plateau(**kwargs):
 
   if len(callback.metrics_window) != callback.window_size:
     raise ValueError(
-        'The metrics window must be of length {}, received a window of length'
-        ' {}'.format(callback.window_size, len(callback.metrics_window)))
+        f'The metrics window must be of length {callback.window_size}, received a window of length {len(callback.metrics_window)}'
+    )
 
   if callback.cooldown is None:
     callback.cooldown = callback.window_size

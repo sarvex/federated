@@ -106,7 +106,7 @@ def _get_client_ids_meeting_condition(train_tff_data, bad_accuracy_cutoff,
   bad_client_ids_inversion_map = {}
   good_client_ids_inversion_map = {}
   for client_id in train_tff_data.client_ids:
-    invert_imagery = (1 == np.random.binomial(n=1, p=invert_imagery_likelihood))
+    invert_imagery = np.random.binomial(n=1, p=invert_imagery_likelihood) == 1
 
     # TF Dataset for particular client.
     raw_images_ds = train_tff_data.create_tf_dataset_for_client(client_id)
@@ -143,7 +143,7 @@ def main(argv):
     if hparam_dict[k] is None:
       hparam_dict[k] = 'None'
   for k, v in hparam_dict.items():
-    print('{} : {} '.format(k, v))
+    print(f'{k} : {v} ')
 
   if FLAGS.invert_imagery_likelihood > 1.0:
     raise ValueError('invert_imagery_likelihood cannot be greater than 1.0')

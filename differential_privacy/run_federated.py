@@ -142,8 +142,8 @@ def main(argv):
   server_optimizer_fn = optimizer_utils.create_optimizer_fn_from_flags('server')
 
   def iterative_process_builder(
-      model_fn: Callable[[], tff.learning.Model],
-  ) -> tff.templates.IterativeProcess:
+        model_fn: Callable[[], tff.learning.Model],
+    ) -> tff.templates.IterativeProcess:
     """Creates an iterative process using a given TFF `model_fn`.
 
     Args:
@@ -159,7 +159,7 @@ def main(argv):
 
     if FLAGS.uniform_weighting:
       client_weighting = tff.learning.ClientWeighting.UNIFORM
-    elif FLAGS.task == 'shakespeare' or FLAGS.task == 'stackoverflow_nwp':
+    elif FLAGS.task in ['shakespeare', 'stackoverflow_nwp']:
 
       def client_weighting(local_outputs):
         return tf.cast(tf.squeeze(local_outputs['num_tokens']), tf.float32)

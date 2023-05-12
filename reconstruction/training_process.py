@@ -504,24 +504,22 @@ def _instantiate_aggregation_process(
     aggregation_factory = tff.aggregators.MeanFactory()
     aggregation_process = aggregation_factory.create(
         model_weights_type.trainable, tff.TensorType(tf.float32))
-  else:
-    # We give precedence to unweighted aggregation.
-    if isinstance(aggregation_factory,
+  elif isinstance(aggregation_factory,
                   tff.aggregators.UnweightedAggregationFactory):
-      if client_weight_fn is not None:
-        logging.warning(
-            'When using an unweighted aggregation, '
-            '`client_weight_fn` should not be specified; found '
-            '`client_weight_fn` %s', client_weight_fn)
-      aggregation_process = aggregation_factory.create(
-          model_weights_type.trainable)
-    elif isinstance(aggregation_factory,
-                    tff.aggregators.WeightedAggregationFactory):
-      aggregation_process = aggregation_factory.create(
-          model_weights_type.trainable, tff.TensorType(tf.float32))
-    else:
-      raise ValueError('Unknown type of aggregation factory: {}'.format(
-          type(aggregation_factory)))
+    if client_weight_fn is not None:
+      logging.warning(
+          'When using an unweighted aggregation, '
+          '`client_weight_fn` should not be specified; found '
+          '`client_weight_fn` %s', client_weight_fn)
+    aggregation_process = aggregation_factory.create(
+        model_weights_type.trainable)
+  elif isinstance(aggregation_factory,
+                  tff.aggregators.WeightedAggregationFactory):
+    aggregation_process = aggregation_factory.create(
+        model_weights_type.trainable, tff.TensorType(tf.float32))
+  else:
+    raise ValueError(
+        f'Unknown type of aggregation factory: {type(aggregation_factory)}')
   return aggregation_process
 
 

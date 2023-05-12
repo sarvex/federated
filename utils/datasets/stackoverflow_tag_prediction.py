@@ -197,17 +197,16 @@ def get_federated_datasets(
     training and test datasets.
   """
   if word_vocab_size <= 0:
-    raise ValueError('word_vocab_size must be a positive integer; you have '
-                     'passed {}'.format(word_vocab_size))
+    raise ValueError(
+        f'word_vocab_size must be a positive integer; you have passed {word_vocab_size}'
+    )
   elif tag_vocab_size <= 0:
-    raise ValueError('tag_vocab_size must be a positive integer; you have '
-                     'have passed {}'.format(tag_vocab_size))
+    raise ValueError(
+        f'tag_vocab_size must be a positive integer; you have have passed {tag_vocab_size}'
+    )
 
-  if train_shuffle_buffer_size <= 1:
-    train_shuffle_buffer_size = 1
-  if test_shuffle_buffer_size <= 1:
-    test_shuffle_buffer_size = 1
-
+  train_shuffle_buffer_size = max(train_shuffle_buffer_size, 1)
+  test_shuffle_buffer_size = max(test_shuffle_buffer_size, 1)
   (stackoverflow_train, _,
    stackoverflow_test) = tff.simulation.datasets.stackoverflow.load_data()
 
@@ -276,11 +275,8 @@ def get_centralized_datasets(
       dataset.
     test_dataset: A `tf.data.Dataset` instance representing the test dataset.
   """
-  if train_shuffle_buffer_size <= 1:
-    train_shuffle_buffer_size = 1
-  if test_shuffle_buffer_size <= 1:
-    test_shuffle_buffer_size = 1
-
+  train_shuffle_buffer_size = max(train_shuffle_buffer_size, 1)
+  test_shuffle_buffer_size = max(test_shuffle_buffer_size, 1)
   word_vocab = create_word_vocab(word_vocab_size)
   tag_vocab = create_tag_vocab(tag_vocab_size)
 

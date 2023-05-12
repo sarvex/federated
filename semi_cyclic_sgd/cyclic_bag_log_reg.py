@@ -157,16 +157,13 @@ class CyclicDataGenerator(object):
       i_mod = i % group_size
       if i_mod + self.batch_size <= group_size:
         result = self.data[group][i_mod:i_mod + self.batch_size]
-        if not result:
-          print(day, group, self.num_groups, start_index, end_index, i,
-                group_size, i_mod, self.batch_size)
       else:
         result = self.data[group][i_mod:]
         remainder = self.batch_size - len(result)
         result.extend(self.data[group][:remainder])
-        if not result:
-          print(day, group, self.num_groups, start_index, end_index, i,
-                group_size, i_mod, self.batch_size)
+      if not result:
+        print(day, group, self.num_groups, start_index, end_index, i,
+              group_size, i_mod, self.batch_size)
       yield result
 
   def get_test_data(self, group):
@@ -192,8 +189,8 @@ class CyclicDataGenerator(object):
     elif row[0] == '0':
       row[0] = 0
     else:
-      raise ValueError('label neither 0 nor 1, but: type {}, value {}'.format(
-          type(row[0]), row[0]))
+      raise ValueError(
+          f'label neither 0 nor 1, but: type {type(row[0])}, value {row[0]}')
     row[5] = su.line_to_word_ids(row[5], vocab)
 
 
@@ -217,12 +214,10 @@ class IidDataGenerator(CyclicDataGenerator):
                                  num_examples_per_day_per_group, batch_size)
     with open(path, 'r') as f:
       csv_reader = csv.reader(f, delimiter=',')
-      i = 0
-      for row in csv_reader:
+      for i, row in enumerate(csv_reader):
         self.process_row(row, vocab)
         label = row[0]
         self.data[i % self.num_groups].append([row[1:], label])
-        i += 1
     for g in range(0, self.num_groups):
       random.shuffle(self.data[g])
 
@@ -269,14 +264,13 @@ class NonIidDataGenerator(CyclicDataGenerator):
           if b < 0:
             if label == 1 or r >= abs(b):
               self.data[group].append([row[1:], label])
-          else:
-            if label == 0 or r >= b:
-              self.data[group].append([row[1:], label])
+          elif label == 0 or r >= b:
+            self.data[group].append([row[1:], label])
         else:
           # No biasing, add unconditionally.
           self.data[group].append([row[1:], label])
     for g in range(0, self.num_groups):
-      logger.log('group {}: {} examples'.format(g, len(self.data[g])))
+      logger.log(f'group {g}: {len(self.data[g])} examples')
       random.shuffle(self.data[g])
 
 
@@ -306,15 +300,15 @@ def log_config(logger):
   logger.log('== Configuration ==')
   logger.log('task_id=%d' % FLAGS.task_id)
   logger.log('lr=%f' % FLAGS.lr)
-  logger.log('vocab_size=%s' % FLAGS.vocab_size)
-  logger.log('batch_size=%s' % FLAGS.batch_size)
-  logger.log('bow_limit=%s' % FLAGS.bow_limit)
-  logger.log('training_data=%s' % FLAGS.training_data)
-  logger.log('test_data=%s' % FLAGS.test_data)
+  logger.log(f'vocab_size={FLAGS.vocab_size}')
+  logger.log(f'batch_size={FLAGS.batch_size}')
+  logger.log(f'bow_limit={FLAGS.bow_limit}')
+  logger.log(f'training_data={FLAGS.training_data}')
+  logger.log(f'test_data={FLAGS.test_data}')
   logger.log('num_groups=%d' % FLAGS.num_groups)
   logger.log('num_days=%d' % FLAGS.num_days)
   logger.log('num_train_examples_per_day=%d' % FLAGS.num_train_examples_per_day)
-  logger.log('mode=%s' % FLAGS.mode)
+  logger.log(f'mode={FLAGS.mode}')
   logger.log('bias=%f' % FLAGS.bias)
   logger.log('replica=%d' % FLAGS.replica)
 
@@ -395,10 +389,7 @@ def main(unused_args):
   logger.log('Creating model(s)')
   tf.set_random_seed(FLAGS.replica)
   models = []
-  if FLAGS.mode == 'sep':
-    num_models = FLAGS.num_groups
-  else:
-    num_models = 1
+  num_models = FLAGS.num_groups if FLAGS.mode == 'sep' else 1
   for _ in range(num_models):
     model = Model(FLAGS.lr, vocab, FLAGS.bow_limit)
     features, labels, train_op, loss_op, eval_metric_op = model.create_model()
@@ -415,10 +406,7 @@ def main(unused_args):
     sess.run(tf.compat.v1.global_variables_initializer())
     for d in range(0, FLAGS.num_days):
       for g in range(0, FLAGS.num_groups):
-        if FLAGS.mode == 'sep':
-          m = models[g]
-        else:
-          m = models[0]
+        m = models[g] if FLAGS.mode == 'sep' else models[0]
         num_train_examples = 0
         # Train.
         for batch in training_data.get(d, g):
@@ -491,7 +479,7 @@ def main(unused_args):
                 num_train_examples,
                 prefix='sc %d on %d: ' % (g, gt))
         else:
-          raise ValueError('unsupported mode %s' % FLAGS.mode)
+          raise ValueError(f'unsupported mode {FLAGS.mode}')
   logger.log('END_MARKER')
 
 

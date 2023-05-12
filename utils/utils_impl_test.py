@@ -43,7 +43,7 @@ def flag_sandbox(flag_value_dict):
   yield
 
   # Restore the saved values.
-  for name in preserved_value_dict.keys():
+  for name in preserved_value_dict:
     FLAGS[name].unparse()
   _set_flags(preserved_value_dict)
 

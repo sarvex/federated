@@ -41,8 +41,8 @@ def atomic_write_to_csv(dataframe: pd.DataFrame,
   """
   if not isinstance(dataframe, pd.DataFrame):
     raise ValueError(
-        'dataframe must be an instance of `pandas.DataFrame`, received a `{}`'
-        .format(type(dataframe)))
+        f'dataframe must be an instance of `pandas.DataFrame`, received a `{type(dataframe)}`'
+    )
 
   # At least when writing a zip, .to_csv() is not happy taking a gfile,
   # so we need a temp file on the local filesystem.

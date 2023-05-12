@@ -41,7 +41,7 @@ def flag_sandbox(flag_value_dict):
   yield
 
   # Restore the saved values.
-  for name in preserved_value_dict.keys():
+  for name in preserved_value_dict:
     FLAGS[name].unparse()
   _set_flags(preserved_value_dict)
 
@@ -61,26 +61,22 @@ _OPTIMIZERS_TO_TEST = [
 class FlagUtilsTest(tf.test.TestCase, parameterized.TestCase):
 
   def test_create_optimizer_fn_from_flags_invalid_optimizer(self):
-    FLAGS['{}_optimizer'.format(TEST_CLIENT_FLAG_PREFIX)].value = 'foo'
+    FLAGS[f'{TEST_CLIENT_FLAG_PREFIX}_optimizer'].value = 'foo'
     with self.assertRaisesRegex(ValueError, 'not a valid optimizer'):
       flag_utils.create_optimizer_fn_from_flags(TEST_CLIENT_FLAG_PREFIX)
 
   def test_create_optimizer_fn_with_no_learning_rate(self):
-    with flag_sandbox({
-        '{}_optimizer'.format(TEST_CLIENT_FLAG_PREFIX): 'sgd',
-        '{}_learning_rate'.format(TEST_CLIENT_FLAG_PREFIX): None
-    }):
+    with flag_sandbox({f'{TEST_CLIENT_FLAG_PREFIX}_optimizer': 'sgd', f'{TEST_CLIENT_FLAG_PREFIX}_learning_rate': None}):
       with self.assertRaisesRegex(ValueError, 'Learning rate'):
         flag_utils.create_optimizer_fn_from_flags(TEST_CLIENT_FLAG_PREFIX)
 
   def test_create_optimizer_fn_from_flags_flags_set_not_for_optimizer(self):
-    with flag_sandbox({'{}_optimizer'.format(TEST_CLIENT_FLAG_PREFIX): 'sgd'}):
+    with flag_sandbox({f'{TEST_CLIENT_FLAG_PREFIX}_optimizer': 'sgd'}):
       # Set an Adam flag that isn't used in SGD.
       # We need to use `_parse_args` because that is the only way FLAGS is
       # notified that a non-default value is being used.
-      bad_adam_flag = '{}_adam_beta_1'.format(TEST_CLIENT_FLAG_PREFIX)
-      FLAGS._parse_args(
-          args=['--{}=0.5'.format(bad_adam_flag)], known_only=True)
+      bad_adam_flag = f'{TEST_CLIENT_FLAG_PREFIX}_adam_beta_1'
+      FLAGS._parse_args(args=[f'--{bad_adam_flag}=0.5'], known_only=True)
       with self.assertRaisesRegex(
           ValueError,
           r'Commandline flags for .*\[sgd\].*\'test_client_adam_beta_1\'.*'):
@@ -91,12 +87,7 @@ class FlagUtilsTest(tf.test.TestCase, parameterized.TestCase):
   def test_create_client_optimizer_from_flags(self, optimizer_name,
                                               optimizer_cls):
     commandline_set_learning_rate = 100.0
-    with flag_sandbox({
-        '{}_optimizer'.format(TEST_CLIENT_FLAG_PREFIX):
-            optimizer_name,
-        '{}_learning_rate'.format(TEST_CLIENT_FLAG_PREFIX):
-            commandline_set_learning_rate
-    }):
+    with flag_sandbox({f'{TEST_CLIENT_FLAG_PREFIX}_optimizer': optimizer_name, f'{TEST_CLIENT_FLAG_PREFIX}_learning_rate': commandline_set_learning_rate}):
 
       custom_optimizer_fn = flag_utils.create_optimizer_fn_from_flags(
           TEST_CLIENT_FLAG_PREFIX)
@@ -113,12 +104,7 @@ class FlagUtilsTest(tf.test.TestCase, parameterized.TestCase):
   def test_create_server_optimizer_from_flags(self, optimizer_name,
                                               optimizer_cls):
     commandline_set_learning_rate = 100.0
-    with flag_sandbox({
-        '{}_optimizer'.format(TEST_SERVER_FLAG_PREFIX):
-            optimizer_name,
-        '{}_learning_rate'.format(TEST_SERVER_FLAG_PREFIX):
-            commandline_set_learning_rate
-    }):
+    with flag_sandbox({f'{TEST_SERVER_FLAG_PREFIX}_optimizer': optimizer_name, f'{TEST_SERVER_FLAG_PREFIX}_learning_rate': commandline_set_learning_rate}):
       custom_optimizer_fn = flag_utils.create_optimizer_fn_from_flags(
           TEST_SERVER_FLAG_PREFIX)
       custom_optimizer = custom_optimizer_fn()

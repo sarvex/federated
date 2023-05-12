@@ -101,9 +101,7 @@ def server_update(model, server_optimizer, server_state, aggregated_gradients,
 
   # Apply the update to the model. Note that we do not multiply by -1.0, since
   # we actually accumulate the client gradients.
-  grads_and_vars = [
-      (x, v) for x, v in zip(aggregated_gradients, model_weights.trainable)
-  ]
+  grads_and_vars = list(zip(aggregated_gradients, model_weights.trainable))
 
   server_optimizer.apply_gradients(grads_and_vars)
 

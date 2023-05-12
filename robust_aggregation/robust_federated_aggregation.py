@@ -30,8 +30,7 @@ class RobustWeiszfeldFactory(tff.aggregators.WeightedAggregationFactory):
         1e-6.
     """
     if not isinstance(num_communication_passes, int):
-      raise TypeError('Expected `int`, found {}.'.format(
-          type(num_communication_passes)))
+      raise TypeError(f'Expected `int`, found {type(num_communication_passes)}.')
     if num_communication_passes < 1:
       raise ValueError('Aggregation requires num_communication_passes >= 1')
 

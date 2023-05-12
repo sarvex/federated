@@ -157,14 +157,14 @@ def _server_optimizer_fn(model_weights, name, learning_rate, noise_std):
         noise_std=noise_std,
         model_weight_specs=model_weight_specs)
   else:
-    raise ValueError('Unknown server optimizer name {}'.format(name))
+    raise ValueError(f'Unknown server optimizer name {name}')
 
 
 def _client_optimizer_fn(name, learning_rate):
   if name == 'sgd':
     return tf.keras.optimizers.SGD(learning_rate)
   else:
-    raise ValueError('Unknown client optimizer name {}'.format(name))
+    raise ValueError(f'Unknown client optimizer name {name}')
 
 
 def _create_original_fedavg_cnn_model(only_digits):
@@ -196,7 +196,7 @@ def _create_original_fedavg_cnn_model(only_digits):
       data_format=data_format,
       activation=tf.nn.relu)
 
-  model = tf.keras.models.Sequential([
+  return tf.keras.models.Sequential([
       conv2d(filters=32, input_shape=input_shape),
       max_pool(),
       conv2d(filters=64),
@@ -206,8 +206,6 @@ def _create_original_fedavg_cnn_model(only_digits):
       tf.keras.layers.Dense(10 if only_digits else 62),
       tf.keras.layers.Activation(tf.nn.softmax),
   ])
-
-  return model
 
 
 def _get_client_datasets_fn(train_data):
